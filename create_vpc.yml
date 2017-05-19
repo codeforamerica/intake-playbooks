@@ -3,14 +3,14 @@
   connection: local
   gather_facts: no
   vars:
+    project: "Clear My Record"
     region: us-west-2
-    # prefix for naming
     prefix: staging
-    # availability zone
     az: us-west-2c
+    az2: us-west-2b
   tasks:
     - name: create vpc
-      ec2_vpc_net:
+      ec2_vpc:
         region: "{{ region }}"
         cidr_block: 10.0.0.0/16
         resource_tags: '{"Name":"{{ prefix }}_vpc"}'
@@ -18,9 +18,6 @@
           - cidr: 10.0.0.0/24
             az: "{{ az }}"
             resource_tags: '{"Name":"{{ prefix }}_subnet_public"}'
-          - cidr: 10.0.1.0/24
-            az: "{{ az }}"
-            resource_tags: '{"Name":"{{ prefix }}_subnet_private"}'
         internet_gateway: yes
         route_tables:
           - subnets:
@@ -36,3 +33,71 @@
       shell: echo "{{ item.resource_tags.Name }}"":" "{{ item.id }}"
             >> "{{ prefix }}"_vpc_info
       with_items: "{{ vpc.subnets }}"
+
+    - name: "Create and associate production DMZ network ACL with DMZ subnets"
+      ec2_vpc_nacl:
+        vpc_id: "{{ vpc.vpc_id }}"
+        name: "{{ prefix }}-nacl"
+        region: "{{ region }}"
+        subnets: ["{{ prefix }}_subnet_public", "{{ prefix }}_subnet_private"]
+
+        ingress: [
+            # rule no, protocol, allow/deny, cidr, icmp_code, icmp_type,
+            #                                             port from, port to
+            [100, 'tcp', 'allow', '0.0.0.0/0', null, null, 22, 22],
+            [200, 'tcp', 'allow', '0.0.0.0/0', null, null, 80, 80],
+            [300, 'icmp', 'allow', '0.0.0.0/0', 0, 8],
+        ]
+        egress: [
+            [100, 'all', 'allow', '0.0.0.0/0', null, null, null, null]
+        ]
+        state: 'present'
+
+    - name: Create subnet for database servers
+      ec2_vpc_subnet:
+        state: present
+        vpc_id: "{{ vpc.vpc_id }}"
+        region: "{{ region }}"
+        az: "{{ az }}"
+        cidr: 10.0.1.16/24
+        resource_tags:
+          Name: "{{ prefix }}_subnet_private"
+      register: "subnet_private"
+
+    - name: Create 2nd subnet for database servers
+      ec2_vpc_subnet:
+        state: present
+        vpc_id: "{{ vpc.vpc_id }}"
+        region: "{{ region }}"
+        az: "{{ az2 }}"
+        cidr: 10.0.2.16/24
+        resource_tags:
+          Name: "{{ prefix }}_subnet_private2"
+      register: "subnet_private2"
+
+    - name: Create RDS subnet group
+      rds_subnet_group:
+        region: "{{ region }}"
+        state: present
+        name: "{{ prefix }}-rds-subnet-group"
+        description: "Database for {{ prefix }} instance of {{ project }}"
+        subnets:
+          - "{{ subnet_private.subnet.id }}"
+          - "{{ subnet_private2.subnet.id }}"
+      register:
+        rds_subnet_group
+
+    - name: Create database on subnet
+      rds:
+        command: create
+        region: "{{ region }}"
+        instance_name: "{{ prefix }}-database"
+        region: "{{ region }}"
+        subnet: "{{ prefix }}-rds-subnet-group"
+        db_engine: postgres
+        size: 10
+        instance_type: db.t2.micro
+        username: changeme
+        password: 1nsecure
+      register: "database"
+
