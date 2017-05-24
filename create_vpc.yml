@@ -108,6 +108,53 @@
             cidr_ip: 0.0.0.0/0
       register: "rds_sg"
 
+    - name: Create S3 bucket
+      s3_bucket:
+        name: "{{ project_slug  }}-{{ prefix }}"
+        state: present
+        versioning: no
+
+    - name: Create S3 User for Application
+      iam:
+        iam_type: user
+        name: "{{ prefix }}-s3-user"
+        state: present
+        access_key_state: create
+
+    - name: Create S3 permission for user
+      iam_policy:
+        iam_name: "{{ prefix }}-s3-user"
+        iam_type: user
+        state: present
+        region: "{{ region }}"
+        policy_name: "s3-user"
+        policy_json: >
+          {
+              "Statement": [
+                  {
+                      "Action": [
+                          "s3:ListBucket"
+                      ],
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:s3:::{{ project_slug }}-{{ prefix }}"
+                      ]
+                  },
+                  {
+                      "Action": [
+                          "s3:PutObject",
+                          "s3:GetObject",
+                          "s3:DeleteObject"
+                      ],
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:s3:::{{ project_slug }}-{{ prefix }}/*"
+                      ]
+                  }
+              ],
+              "Version": "2012-10-17"
+          }
+
     - name: Create database on subnet
       rds:
         command: create
@@ -119,7 +166,6 @@
         db_engine: postgres
         upgrade: yes
         multi_zone: no
-
         size: "{{ pg_fs_size }}"
         instance_type: "{{ pg_instance_type }}"
         publicly_accessible: yes

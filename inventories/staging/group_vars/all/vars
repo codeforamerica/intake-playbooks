@@ -1,5 +1,6 @@
 ---
 project: "Clear My Record"
+project_slug: cmr
 region: us-west-2
 prefix: staging
 az: us-west-2c
