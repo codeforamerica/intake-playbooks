@@ -16,6 +16,20 @@
         state: absent
         name: "{{ prefix }}-rds-subnet-group"
 
+    - name: Create S3 User for Application
+      iam:
+        iam_type: user
+        name: "{{ prefix }}-s3-user"
+        state: present
+        access_key_state: create
+
+    - name: Remove S3 permission for user
+      iam_policy:
+        policy_name: "{{ prefix }}-s3-policy"
+        iam_name: "{{ prefix }}-s3-user"
+        iam_type: user
+        state: absent
+
     - name: Remove S3 User for Application
       iam:
         iam_type: user
@@ -26,12 +40,6 @@
       s3_bucket:
         name: "{{ project_slug  }}-{{ prefix }}"
         state: absent
-
-    - name: Create S3 permission for user
-      iam_policy:
-        iam_name: "{{ prefix }}-s3-user"
-        iam_type: user
-        state: present
 
     - name: Get VPC
       ec2_vpc_net:
