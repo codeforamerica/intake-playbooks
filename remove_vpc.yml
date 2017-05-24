@@ -1,0 +1,92 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    project: "Clear My Record"
+    region: us-west-2
+    prefix: staging
+    az: us-west-2c
+    az2: us-west-2b
+  tasks:
+    - name: Remove rds
+      rds:
+        command: delete
+        region: "{{ region }}"
+        instance_name: "{{ prefix }}-database"
+        wait: yes
+
+    - name: Remove RDS subnet group
+      rds_subnet_group:
+        region: "{{ region }}"
+        state: absent
+        name: "{{ prefix }}-rds-subnet-group"
+
+    - name: Get VPC
+      ec2_vpc_net:
+        state: present
+        name: "{{ prefix }}-vpc"
+        region: "{{ region }}"
+        cidr_block: 10.0.0.0/16
+        resource_tags: '{"Name":"{{ prefix }}_vpc"}'
+      register: vpc
+
+    - name: Remove database security group
+      ec2_group:
+        name: "{{ prefix }}-rds-security-group"
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        state: absent
+      register: "rds_sg"
+
+    - name: Remove public subnet route table
+      ec2_vpc_route_table:
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        tags:
+          Name: "{{ prefix }}_public_route"
+        state: absent
+
+    - name: Remove public subnet
+      ec2_vpc_subnet:
+        state: absent
+        vpc_id: "{{ vpc.vpc.id }}"
+        az: "{{ az }}"
+        region: "{{ region }}"
+        cidr: 10.0.0.0/24
+
+    - name: Remove private subnet
+      ec2_vpc_subnet:
+        state: absent
+        vpc_id: "{{ vpc.vpc.id }}"
+        az: "{{ az }}"
+        region: "{{ region }}"
+        cidr: 10.0.1.0/24
+
+    - name: Remove private subnet2
+      ec2_vpc_subnet:
+        state: absent
+        az: "{{ az2 }}"
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        cidr: 10.0.2.0/24
+
+    - name: Remove IGW
+      ec2_vpc_igw:
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        state: absent
+
+    - name: Remove NACL
+      ec2_vpc_nacl:
+        state: absent
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: "{{ prefix }}-nacl"
+        region: "{{ region }}"
+
+    - name: Remove vpc
+      ec2_vpc_net:
+        state: absent
+        name: "{{ prefix }}-vpc"
+        region: "{{ region }}"
+        cidr_block: 10.0.0.0/16

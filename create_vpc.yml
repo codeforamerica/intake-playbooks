@@ -8,69 +8,86 @@
     prefix: staging
     az: us-west-2c
     az2: us-west-2b
+    pg_username: postgres
+    pg_password: "!sdfasg#ffgg$hkj;lk;jk;lh%^&*()_09sdf8765"
+    pg_app_username: intake
+    pg_app_password: "!sdfasg#ffgg$hkj;lk;jk;lh%^&*()_"
   tasks:
     - name: create vpc
-      ec2_vpc:
+      ec2_vpc_net:
+        state: present
+        name: "{{ prefix }}-vpc"
         region: "{{ region }}"
         cidr_block: 10.0.0.0/16
         resource_tags: '{"Name":"{{ prefix }}_vpc"}'
-        subnets:
-          - cidr: 10.0.0.0/24
-            az: "{{ az }}"
-            resource_tags: '{"Name":"{{ prefix }}_subnet_public"}'
-        internet_gateway: yes
-        route_tables:
-          - subnets:
-              - 10.0.0.0/24
-            routes:
-              - dest: 0.0.0.0/0
-                gw: igw
       register: vpc
-    - name: write vpc id to {{ prefix }}_vpc_info file
-      shell: echo "{{ prefix }}"_vpc":" "{{ vpc.vpc_id }}"
-            > "{{ prefix }}"_vpc_info
-    - name: write subnets id to {{ prefix }}_vpc_info file
-      shell: echo "{{ item.resource_tags.Name }}"":" "{{ item.id }}"
-            >> "{{ prefix }}"_vpc_info
-      with_items: "{{ vpc.subnets }}"
+
+    - name: Create public subnet
+      ec2_vpc_subnet:
+        state: present
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        az: "{{ az }}"
+        cidr: 10.0.0.0/24
+        resource_tags: '{"Name": "{{ prefix }}_subnet_public"}'
+      register: "subnet_public"
+
+    - name: Create IGW
+      ec2_vpc_igw:
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        state: present
+      register: igw
+
+    - name: Set up public subnet route table
+      ec2_vpc_route_table:
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        tags:
+          Name: "{{ prefix }}_public_route"
+        subnets:
+          - "{{ subnet_public.subnet.id }}"
+        routes:
+          - dest: 0.0.0.0/0
+            gateway_id: "{{ igw.gateway_id }}"
+      register: public_route_table
 
     - name: "Create and associate production DMZ network ACL with DMZ subnets"
       ec2_vpc_nacl:
-        vpc_id: "{{ vpc.vpc_id }}"
+        vpc_id: "{{ vpc.vpc.id }}"
         name: "{{ prefix }}-nacl"
         region: "{{ region }}"
-        subnets: ["{{ prefix }}_subnet_public", "{{ prefix }}_subnet_private"]
+        subnets: ["{{ prefix }}_subnet_public"]
 
         ingress: [
             # rule no, protocol, allow/deny, cidr, icmp_code, icmp_type,
             #                                             port from, port to
-            [100, 'tcp', 'allow', '0.0.0.0/0', null, null, 22, 22],
-            [200, 'tcp', 'allow', '0.0.0.0/0', null, null, 80, 80],
-            [300, 'icmp', 'allow', '0.0.0.0/0', 0, 8],
+            [100, 'tcp', 'allow', '0.0.0.0/0', null, null, 5432, 5432],
+            [200, 'icmp', 'allow', '0.0.0.0/0', 0, 8],
         ]
         egress: [
             [100, 'all', 'allow', '0.0.0.0/0', null, null, null, null]
         ]
         state: 'present'
 
-    - name: Create subnet for database servers
+    - name: Create private subnet
       ec2_vpc_subnet:
         state: present
-        vpc_id: "{{ vpc.vpc_id }}"
+        vpc_id: "{{ vpc.vpc.id }}"
         region: "{{ region }}"
         az: "{{ az }}"
-        cidr: 10.0.1.16/24
+        cidr: 10.0.1.0/24
         resource_tags:
           Name: "{{ prefix }}_subnet_private"
       register: "subnet_private"
 
-    - name: Create 2nd subnet for database servers
+    - name: Create private subnet2
       ec2_vpc_subnet:
         state: present
-        vpc_id: "{{ vpc.vpc_id }}"
+        vpc_id: "{{ vpc.vpc.id }}"
         region: "{{ region }}"
         az: "{{ az2 }}"
-        cidr: 10.0.2.16/24
+        cidr: 10.0.2.0/24
         resource_tags:
           Name: "{{ prefix }}_subnet_private2"
       register: "subnet_private2"
@@ -80,12 +97,26 @@
         region: "{{ region }}"
         state: present
         name: "{{ prefix }}-rds-subnet-group"
-        description: "Database for {{ prefix }} instance of {{ project }}"
+        description: "Database subnet for {{ prefix }} instance of {{ project }}"
         subnets:
+          - "{{ subnet_public.subnet.id }}"
           - "{{ subnet_private.subnet.id }}"
           - "{{ subnet_private2.subnet.id }}"
-      register:
-        rds_subnet_group
+      register: "rds_subnet_group"
+
+    - name: Create database security group
+      ec2_group:
+        name: "{{ prefix }}-rds-security-group"
+        description: an example EC2 group
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        state: present
+        rules:
+          - proto: tcp
+            from_port: 5432
+            to_port: 5432
+            cidr_ip: 0.0.0.0/0
+      register: "rds_sg"
 
     - name: Create database on subnet
       rds:
@@ -94,10 +125,31 @@
         instance_name: "{{ prefix }}-database"
         region: "{{ region }}"
         subnet: "{{ prefix }}-rds-subnet-group"
+        vpc_security_groups: "{{ rds_sg.group_id }}"
         db_engine: postgres
         size: 10
         instance_type: db.t2.micro
-        username: changeme
-        password: 1nsecure
+        publicly_accessible: yes
+        username: "{{ pg_username }}"
+        password: "{{ pg_password }}"
+        wait: true
+        wait_timeout: 9999999999999
       register: "database"
 
+    - name: Create Datbase
+      postgresql_db:
+        login_host: "{{ database.instance.endpoint }}"
+        login_user: "{{ pg_username }}"
+        login_password: "{{ pg_password }}"
+        name: intake
+
+    - name: Create Application User with DB access
+      postgresql_user:
+        login_host: "{{ database.instance.endpoint }}"
+        login_user: "{{ pg_username }}"
+        login_password: "{{ pg_password }}"
+        db: intake
+        name: "{{ pg_app_username }}"
+        password: "{{ pg_app_password }}"
+        priv: "CONNECT"
+        role_attr_flags: NOSUPERUSER
