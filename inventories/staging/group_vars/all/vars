@@ -1,0 +1,10 @@
+---
+project: "Clear My Record"
+region: us-west-2
+prefix: staging
+az: us-west-2c
+az2: us-west-2b
+pg_username: postgres
+pg_fs_size: 5
+pg_instance_type: db.t2.micro
+pg_app_username: intake

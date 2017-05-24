@@ -2,12 +2,6 @@
 - hosts: localhost
   connection: local
   gather_facts: no
-  vars:
-    project: "Clear My Record"
-    region: us-west-2
-    prefix: staging
-    az: us-west-2c
-    az2: us-west-2b
   tasks:
     - name: Remove rds
       rds:

@@ -2,16 +2,6 @@
 - hosts: localhost
   connection: local
   gather_facts: no
-  vars:
-    project: "Clear My Record"
-    region: us-west-2
-    prefix: staging
-    az: us-west-2c
-    az2: us-west-2b
-    pg_username: postgres
-    pg_password: "!sdfasg#ffgg$hkj;lk;jk;lh%^&*()_09sdf8765"
-    pg_app_username: intake
-    pg_app_password: "!sdfasg#ffgg$hkj;lk;jk;lh%^&*()_"
   tasks:
     - name: create vpc
       ec2_vpc_net:
@@ -127,8 +117,11 @@
         subnet: "{{ prefix }}-rds-subnet-group"
         vpc_security_groups: "{{ rds_sg.group_id }}"
         db_engine: postgres
-        size: 10
-        instance_type: db.t2.micro
+        upgrade: yes
+        multi_zone: no
+
+        size: "{{ pg_fs_size }}"
+        instance_type: "{{ pg_instance_type }}"
         publicly_accessible: yes
         username: "{{ pg_username }}"
         password: "{{ pg_password }}"
