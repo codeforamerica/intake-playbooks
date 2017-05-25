@@ -128,7 +128,6 @@
         iam_type: user
         state: present
         region: "{{ region }}"
-        policy_name: "s3-user"
         policy_json: >
           {
               "Statement": [
@@ -172,9 +171,18 @@
         publicly_accessible: yes
         username: "{{ pg_username }}"
         password: "{{ pg_password }}"
-        wait: true
-        wait_timeout: 9999999999999
       register: "database"
+
+    - rds:
+        command: facts
+        instance_name: "{{ prefix }}-database"
+        region: "{{ region }}"
+      register: rds_facts
+      until: not(rds_facts.instance.endpoint is none)
+      retries: 20
+      delay: 30
+    - pause:
+        seconds: 8
 
     - name: Create Datbase
       postgresql_db:

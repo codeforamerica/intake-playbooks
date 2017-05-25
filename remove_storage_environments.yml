@@ -9,6 +9,7 @@
         region: "{{ region }}"
         instance_name: "{{ prefix }}-database"
         wait: yes
+        wait_timeout: 10000
 
     - name: Remove RDS subnet group
       rds_subnet_group:
