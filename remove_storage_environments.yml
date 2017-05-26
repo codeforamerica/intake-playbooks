@@ -75,13 +75,21 @@
         region: "{{ region }}"
         cidr: 10.0.0.0/24
 
+    - name: Remove second  public subnet
+      ec2_vpc_subnet:
+        state: absent
+        vpc_id: "{{ vpc.vpc.id }}"
+        az: "{{ az2 }}"
+        region: "{{ region }}"
+        cidr: 10.0.1.0/24
+
     - name: Remove private subnet
       ec2_vpc_subnet:
         state: absent
         vpc_id: "{{ vpc.vpc.id }}"
         az: "{{ az }}"
         region: "{{ region }}"
-        cidr: 10.0.1.0/24
+        cidr: 10.0.2.0/24
 
     - name: Remove private subnet2
       ec2_vpc_subnet:
@@ -89,7 +97,7 @@
         az: "{{ az2 }}"
         region: "{{ region }}"
         vpc_id: "{{ vpc.vpc.id }}"
-        cidr: 10.0.2.0/24
+        cidr: 10.0.3.0/24
 
     - name: Remove IGW
       ec2_vpc_igw:
