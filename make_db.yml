@@ -1,0 +1,68 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Get VPC
+      ec2_vpc_net:
+        state: present
+        name: "{{ prefix }}-vpc"
+        region: "{{ region }}"
+        cidr_block: 10.0.0.0/16
+        resource_tags: '{"Name":"{{ prefix }}_vpc"}'
+      register: vpc
+
+    - name: Create database security group
+      ec2_group:
+        name: "{{ prefix }}-rds-security-group"
+        description: an example EC2 group
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        state: present
+        rules:
+          - proto: tcp
+            from_port: 5432
+            to_port: 5432
+            cidr_ip: 0.0.0.0/0
+      register: "rds_sg"
+
+    - name: Create database on subnet
+      rds:
+        command: create
+        region: "{{ region }}"
+        instance_name: "{{ prefix }}-database-{{ suffix }}"
+        region: "{{ region }}"
+        subnet: "{{ prefix }}-rds-subnet-group"
+        vpc_security_groups: "{{ rds_sg.group_id }}"
+        db_engine: postgres
+        upgrade: yes
+        multi_zone: no
+        size: "{{ pg_fs_size }}"
+        instance_type: "{{ pg_instance_type }}"
+        publicly_accessible: yes
+        username: "{{ pg_username }}"
+        password: "{{ pg_password }}"
+        wait: yes
+        wait_timeout: 100000000000000000
+      register: "database"
+
+
+    - name: Create Datbase
+      postgresql_db:
+        login_host: "{{ database.instance.endpoint }}"
+        login_user: "{{ pg_username }}"
+        login_password: "{{ pg_password }}"
+        name: intake
+
+    - name: Create Application User with DB access
+      postgresql_user:
+        login_host: "{{ database.instance.endpoint }}"
+        login_user: "{{ pg_username }}"
+        login_password: "{{ pg_password }}"
+        db: intake
+        name: "{{ pg_app_username }}"
+        password: "{{ pg_app_password }}"
+        priv: "CONNECT"
+        role_attr_flags: NOSUPERUSER
+        no_password_changes: true
+
