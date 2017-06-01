@@ -6,6 +6,6 @@ prefix: production
 az: us-west-2c
 az2: us-west-2b
 pg_username: postgres
-pg_fs_size: 5
-pg_instance_type: db.t2.micro
+pg_fs_size: 100
+pg_instance_type: db.t2.medium
 pg_app_username: intake

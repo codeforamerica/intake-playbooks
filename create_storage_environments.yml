@@ -170,17 +170,10 @@
               "Version": "2012-10-17"
           }
 
-    - name: Create Read-Only S3 User for Application
-      iam:
-        iam_type: user
-        name: "{{ prefix }}-s3-readonly"
-        state: present
-        access_key_state: create
-
     - name: Create S3 permission for Read-Only User
       iam_policy:
-        policy_name: "{{ prefix }}-s3-readonly"
-        iam_name: "{{ prefix }}-s3-readonly"
+        policy_name: "{{ prefix }}-s3-readonly-from-{{ clone_from_prefix }}"
+        iam_name: "{{ prefix }}-s3-user"
         iam_type: user
         state: present
         region: "{{ region }}"
@@ -194,7 +187,7 @@
                       ],
                       "Effect": "Allow",
                       "Resource": [
-                          "arn:aws:s3:::{{ project_slug }}-{{ prefix }}"
+                          "arn:aws:s3:::{{ project_slug }}-{{ clone_from_prefix }}"
                       ]
                   },
                   {
@@ -203,12 +196,13 @@
                       ],
                       "Effect": "Allow",
                       "Resource": [
-                          "arn:aws:s3:::{{ project_slug }}-{{ prefix }}/*"
+                        "arn:aws:s3:::{{ project_slug }}-{{ clone_from_prefix }}/*"
                       ]
                   }
               ],
               "Version": "2012-10-17"
           }
+      when: clone_from_prefix is defined
 
     - name: Create database on subnet
       rds:

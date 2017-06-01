@@ -9,4 +9,4 @@ pg_username: postgres
 pg_fs_size: 100
 pg_instance_type: db.t2.medium
 pg_app_username: intake
-
+clone_from_prefix: production
