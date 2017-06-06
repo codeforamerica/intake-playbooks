@@ -120,11 +120,11 @@
             cidr_ip: 0.0.0.0/0
       register: "rds_sg"
 
-    - name: Create S3 bucket
+    - name: Create S3 bucket for application media
       s3_bucket:
         name: "{{ project_slug  }}-{{ prefix }}"
         state: present
-        versioning: no
+        versioning: yes
 
     - name: Create S3 User for Application
       iam:
@@ -133,7 +133,7 @@
         state: present
         access_key_state: create
 
-    - name: Create S3 permission for user
+    - name: Create S3 permission for application user on media bucket
       iam_policy:
         policy_name: "{{ prefix }}-s3-policy"
         iam_name: "{{ prefix }}-s3-user"
@@ -170,10 +170,61 @@
               "Version": "2012-10-17"
           }
 
-    - name: Create S3 permission for Read-Only User
+    - name: Create S3 bucket to hold fixtures for data sync
+      s3_bucket:
+        name: "{{ project_slug  }}-sync-{{ prefix }}"
+        state: present
+        versioning: yes
+      when: clone_from_prefix is undefined
+
+    - name: Create S3 User to access the sync and media bucket
+      iam:
+        iam_type: user
+        name: "{{ prefix }}-sync-s3-user"
+        state: present
+        access_key_state: create
+
+    - name: Create S3 permission for sync user on sync bucket
+      iam_policy:
+        policy_name: "{{ prefix }}-sync-s3-policy"
+        iam_name: "{{ prefix }}-sync-s3-user"
+        iam_type: user
+        state: present
+        region: "{{ region }}"
+        policy_json: >
+          {
+              "Statement": [
+                  {
+                      "Action": [
+                          "s3:ListBucket",
+                          "s3:GetBucketLocation",
+                          "s3:ListBucketMultipartUploads",
+                          "s3:ListBucketVersions"
+                      ],
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:s3:::{{ project_slug  }}-sync-{{ clone_from_prefix is undefined | ternary(prefix, clone_from_prefix) }}"
+                      ]
+                  },
+                  {
+                      "Action": [
+                          "s3:*Object*",
+                          "s3:ListMultipartUploadParts",
+                          "s3:AbortMultipartUpload"
+                      ],
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:s3:::{{ project_slug  }}-sync-{{ clone_from_prefix is undefined | ternary(prefix, clone_from_prefix) }}/*"
+                      ]
+                  }
+              ],
+              "Version": "2012-10-17"
+          }
+
+    - name: Create Read-Only S3 permission for sync User to pull media bucket
       iam_policy:
         policy_name: "{{ prefix }}-s3-readonly-from-{{ clone_from_prefix }}"
-        iam_name: "{{ prefix }}-s3-user"
+        iam_name: "{{ prefix }}-sync-s3-user"
         iam_type: user
         state: present
         region: "{{ region }}"
