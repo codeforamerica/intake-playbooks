@@ -2,7 +2,17 @@
 - hosts: localhost
   connection: local
   gather_facts: no
+  vars:
+    full_slug: "{{ project_slug  }}-{{ prefix }}"
+  vars_prompt:
+    - name: "name_of_deploy"
+      prompt: "Tell me again what you want to remove?"
+      private: no
   tasks:
+    - fail:
+        msg: "That was a close one!"
+      when: name_of_deploy != "{{ full_slug }}"
+
     - name: Remove rds
       rds:
         command: delete
@@ -11,18 +21,52 @@
         wait: yes
         wait_timeout: 10000
 
+    - name: Create S3 User with access the sync and media bucket[for rerun]
+      iam:
+        iam_type: user
+        name: "{{ prefix }}-sync-s3-user"
+        state: present
+
+    - name: Create S3 User for Application[for rerun]
+      iam:
+        iam_type: user
+        name: "{{ prefix }}-s3-user"
+        state: present
+
+    - name: Remove S3 permission for sync user on sync bucket
+      iam_policy:
+        policy_name: "{{ prefix }}-sync-s3-policy"
+        iam_name: "{{ prefix }}-sync-s3-user"
+        iam_type: user
+        state: absent
+        region: "{{ region }}"
+
+    - name: Remove Read-Only S3 permission for sync User to pull media bucket
+      iam_policy:
+        policy_name: "{{ prefix }}-s3-readonly-from-{{ clone_from_prefix }}"
+        iam_name: "{{ prefix }}-sync-s3-user"
+        iam_type: user
+        state: absent
+        region: "{{ region }}"
+      when: clone_from_prefix is defined
+
+    - name: Remove S3 User with access the sync and media bucket
+      iam:
+        iam_type: user
+        name: "{{ prefix }}-sync-s3-user"
+        state: absent
+
+    - name: Remove S3 bucket which hold fixtures for data sync
+      s3_bucket:
+        name: "{{ project_slug  }}-sync-{{ prefix }}"
+        state: absent
+      when: clone_from_prefix is undefined
+
     - name: Remove RDS subnet group
       rds_subnet_group:
         region: "{{ region }}"
         state: absent
         name: "{{ prefix }}-rds-subnet-group"
-
-    - name: Create S3 User for Application
-      iam:
-        iam_type: user
-        name: "{{ prefix }}-s3-user"
-        state: present
-        access_key_state: create
 
     - name: Remove S3 permission for user
       iam_policy:
