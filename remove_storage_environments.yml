@@ -2,8 +2,6 @@
 - hosts: localhost
   connection: local
   gather_facts: no
-  vars:
-    full_slug: "{{ project_slug  }}-{{ prefix }}"
   vars_prompt:
     - name: "name_of_deploy"
       prompt: "Tell me again what you want to remove?"
@@ -11,93 +9,93 @@
   tasks:
     - fail:
         msg: "That was a close one!"
-      when: name_of_deploy != "{{ full_slug }}"
+      when: name_of_deploy != "{{ project_slug }}"
 
     - name: Remove rds
       rds:
         command: delete
         region: "{{ region }}"
-        instance_name: "{{ prefix }}-database"
+        instance_name: "{{ project_slug }}-database"
         wait: yes
         wait_timeout: 10000
 
     - name: Create S3 User with access the sync and media bucket[for rerun]
       iam:
         iam_type: user
-        name: "{{ prefix }}-sync-s3-user"
+        name: "{{ project_slug }}-sync-s3-user"
         state: present
 
     - name: Create S3 User for Application[for rerun]
       iam:
         iam_type: user
-        name: "{{ prefix }}-s3-user"
+        name: "{{ project_slug }}-s3-user"
         state: present
 
     - name: Remove S3 permission for sync user on sync bucket
       iam_policy:
-        policy_name: "{{ prefix }}-sync-s3-policy"
-        iam_name: "{{ prefix }}-sync-s3-user"
+        policy_name: "{{ project_slug }}-sync-s3-policy"
+        iam_name: "{{ project_slug }}-sync-s3-user"
         iam_type: user
         state: absent
         region: "{{ region }}"
 
     - name: Remove Read-Only S3 permission for sync User to pull media bucket
       iam_policy:
-        policy_name: "{{ prefix }}-s3-readonly-from-{{ clone_from_prefix }}"
-        iam_name: "{{ prefix }}-sync-s3-user"
+        policy_name: "{{ project_slug }}-s3-readonly-from-{{ clone_from_project_slug }}"
+        iam_name: "{{ project_slug }}-sync-s3-user"
         iam_type: user
         state: absent
         region: "{{ region }}"
-      when: clone_from_prefix is defined
+      when: clone_from_project_slug is defined
 
     - name: Remove S3 User with access the sync and media bucket
       iam:
         iam_type: user
-        name: "{{ prefix }}-sync-s3-user"
+        name: "{{ project_slug }}-sync-s3-user"
         state: absent
 
     - name: Remove S3 bucket which hold fixtures for data sync
       s3_bucket:
-        name: "{{ project_slug  }}-sync-{{ prefix }}"
+        name: "{{ project_slug }}-sync"
         state: absent
-      when: clone_from_prefix is undefined
+      when: clone_from_project_slug is undefined
 
     - name: Remove RDS subnet group
       rds_subnet_group:
         region: "{{ region }}"
         state: absent
-        name: "{{ prefix }}-rds-subnet-group"
+        name: "{{ project_slug }}-rds-subnet-group"
 
     - name: Remove S3 permission for user
       iam_policy:
-        policy_name: "{{ prefix }}-s3-policy"
-        iam_name: "{{ prefix }}-s3-user"
+        policy_name: "{{ project_slug }}-s3-policy"
+        iam_name: "{{ project_slug }}-s3-user"
         iam_type: user
         state: absent
 
     - name: Remove S3 User for Application
       iam:
         iam_type: user
-        name: "{{ prefix }}-s3-user"
+        name: "{{ project_slug }}-s3-user"
         state: absent
 
     - name: Remove S3 bucket
       s3_bucket:
-        name: "{{ project_slug  }}-{{ prefix }}"
+        name: "{{ project_slug }}"
         state: absent
 
     - name: Get VPC
       ec2_vpc_net:
         state: present
-        name: "{{ prefix }}-vpc"
+        name: "{{ project_slug }}-vpc"
         region: "{{ region }}"
         cidr_block: 10.0.0.0/16
-        resource_tags: '{"Name":"{{ prefix }}_vpc"}'
+        resource_tags: '{"Name":"{{ project_slug }}_vpc"}'
       register: vpc
 
     - name: Remove database security group
       ec2_group:
-        name: "{{ prefix }}-rds-security-group"
+        name: "{{ project_slug }}-rds-security-group"
         vpc_id: "{{ vpc.vpc.id }}"
         region: "{{ region }}"
         state: absent
@@ -108,7 +106,7 @@
         vpc_id: "{{ vpc.vpc.id }}"
         region: "{{ region }}"
         tags:
-          Name: "{{ prefix }}_public_route"
+          Name: "{{ project_slug }}_public_route"
         state: absent
 
     - name: Remove public subnet
@@ -153,12 +151,12 @@
       ec2_vpc_nacl:
         state: absent
         vpc_id: "{{ vpc.vpc.id }}"
-        name: "{{ prefix }}-nacl"
+        name: "{{ project_slug }}-nacl"
         region: "{{ region }}"
 
     - name: Remove vpc
       ec2_vpc_net:
         state: absent
-        name: "{{ prefix }}-vpc"
+        name: "{{ project_slug }}-vpc"
         region: "{{ region }}"
         cidr_block: 10.0.0.0/16
