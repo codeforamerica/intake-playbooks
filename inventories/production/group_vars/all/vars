@@ -1,6 +1,6 @@
 ---
 project: "Clear My Record"
-project_slug: cmr
+project_slug: cmr-production
 region: us-west-2
 prefix: production
 az: us-west-2c

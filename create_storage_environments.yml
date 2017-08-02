@@ -174,7 +174,7 @@
       s3_bucket:
         name: "{{ project_slug }}-sync"
         state: present
-        versioning: yes
+        versioning: no
       when: clone_from_project_slug is undefined
 
     - name: Create S3 User to access the sync and media bucket
@@ -258,7 +258,6 @@
     - name: Create RDS postgres instance
       rds:
         command: create
-        region: "{{ region }}"
         instance_name: "{{ project_slug }}-database"
         region: "{{ region }}"
         subnet: "{{ project_slug }}-rds-subnet-group"

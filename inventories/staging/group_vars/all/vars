@@ -1,6 +1,6 @@
 ---
-project: "Clear My Record"
-project_slug: cmr
+project: "Clear My Record[staging]"
+project_slug: cmr-staging
 region: us-west-2
 prefix: staging
 az: us-west-2c
@@ -9,4 +9,4 @@ pg_username: postgres
 pg_fs_size: 100
 pg_instance_type: db.t2.medium
 pg_app_username: intake
-clone_from_prefix: production
+clone_from_project_slug: cmr-production
