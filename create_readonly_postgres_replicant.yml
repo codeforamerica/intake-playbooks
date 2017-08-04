@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - rds:
+        command: facts
+        instance_name: "{{ project_slug }}-database"
+        region: "{{ region }}"
+      register: database
+    - name: Create Postgres Read-Only Replicant
+      rds:
+        command: replicate
+        region: "{{ region }}"
+        instance_name: "{{ project_slug }}-database-readonly"
+        source_instance: "{{ project_slug }}-database"
+        wait: yes
+        wait_timeout: 99999999999
+      register: database-replicate
