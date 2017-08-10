@@ -1,10 +1,10 @@
 ---
 project: "Clear My Record"
-project_slug: cmr-production
-region: us-west-2
+project_slug: cmr-production-r1
+region: us-east-1
 prefix: production
-az: us-west-2c
-az2: us-west-2b
+az: us-east-1a
+az2: us-east-1b
 pg_username: postgres
 pg_fs_size: 100
 pg_instance_type: db.t2.medium

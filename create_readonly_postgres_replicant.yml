@@ -8,6 +8,43 @@
         instance_name: "{{ project_slug }}-database"
         region: "{{ region }}"
       register: database
+
+    - postgresql_privs:
+        login_host: "{{ database.instance.endpoint }}"
+        login_user: "{{ pg_username }}"
+        login_password: "{{ pg_password }}"
+        db: intake
+        privs: CREATE
+        type: database
+        obj: intake
+        role: intake
+
+    - name: Create Metabass User with Privacy Preserving Access
+      postgresql_user:
+        login_host: "{{ database.instance.endpoint }}"
+        login_user: "{{ pg_username }}"
+        login_password: "{{ pg_password }}"
+        db: intake
+        name: "metabase"
+        password: "{{ metabase_db_password }}"
+        priv: "CONNECT"
+        role_attr_flags: NOSUPERUSER
+        no_password_changes: true
+
+
+    - name: Give Metabase User permissions on Purged schema
+      postgresql_privs:
+        login_host: "{{ database.instance.endpoint }}"
+        login_user: "{{ pg_app_username }}"
+        login_password: "{{ pg_app_password }}"
+        db: intake
+        privs: SELECT
+        type: table
+        objs: ALL_IN_SCHEMA
+        schema: purged
+        roles: metabase
+
+
     - name: Create Postgres Read-Only Replicant
       rds:
         command: replicate
@@ -17,3 +54,14 @@
         wait: yes
         wait_timeout: 99999999999
       register: database-replicate
+
+    - rds:
+        command: facts
+        instance_name: "{{ project_slug }}-database-readonly"
+        region: "{{ region }}"
+      register: readonly-database
+      until: not(readonly-database.instance.endpoint is none)
+      retries: 20
+      delay: 45
+    - pause:
+        seconds: 5

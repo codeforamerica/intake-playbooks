@@ -2,6 +2,7 @@
 - hosts: localhost
   connection: local
   gather_facts: no
+
   tasks:
     - name: "Create {{ project }} {{ project_slug }} VPC"
       ec2_vpc_net:
@@ -59,7 +60,7 @@
         vpc_id: "{{ vpc.vpc.id }}"
         name: "{{ project_slug }}-nacl"
         region: "{{ region }}"
-        subnets: ["{{ project_slug }}_subnet_public"]
+        subnets: ["{{ project_slug }}_subnet_public", "{{ project_slug }}_subnet_public2"]
 
         ingress: [
             # rule no, protocol, allow/deny, cidr, icmp_code, icmp_type,
@@ -256,20 +257,25 @@
       when: clone_from_project_slug is defined
 
     - name: Create RDS postgres instance
-      rds:
-        command: create
-        instance_name: "{{ project_slug }}-database"
-        region: "{{ region }}"
-        subnet: "{{ project_slug }}-rds-subnet-group"
-        vpc_security_groups: "{{ rds_sg.group_id }}"
-        db_engine: postgres
-        upgrade: yes
-        multi_zone: no
-        size: "{{ pg_fs_size }}"
-        instance_type: "{{ pg_instance_type }}"
-        publicly_accessible: yes
-        username: "{{ pg_username }}"
-        password: "{{ pg_password }}"
+      command: "aws rds create-db-instance
+        --db-instance-identifier {{ project_slug }}-database
+        --storage-type gp2
+        --allocated-storage {{ pg_fs_size }}
+        --db-instance-class {{ pg_instance_type }}
+        --engine postgres
+        --master-username {{ pg_username }}
+        --master-user-password {{ pg_password }}
+        --vpc-security-group-ids {{ rds_sg.group_id }}
+        --availability-zone {{ az }}
+        --db-subnet-group-name {{ project_slug }}-rds-subnet-group
+        --auto-minor-version-upgrade
+        --no-multi-az
+        --publicly-accessible
+        --storage-encrypted"
+      register: result
+      failed_when: >
+        result.rc != 0 and ('DBInstanceAlreadyExists' not in result.stderr)
+      changed_when: "result.rc == 0"
 
     - rds:
         command: facts
@@ -300,3 +306,14 @@
         priv: "CONNECT"
         role_attr_flags: NOSUPERUSER
         no_password_changes: true
+
+    - name: Give Application User CREATE on database so they can make schemas
+      postgresql_privs:
+        login_host: "{{ database.instance.endpoint }}"
+        login_user: "{{ pg_username }}"
+        login_password: "{{ pg_password }}"
+        db: intake
+        privs: CREATE
+        type: database
+        obj: intake
+        role: intake
