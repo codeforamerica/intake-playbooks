@@ -9,15 +9,15 @@
         region: "{{ region }}"
       register: database
 
-    - postgresql_privs:
-        login_host: "{{ database.instance.endpoint }}"
-        login_user: "{{ pg_username }}"
-        login_password: "{{ pg_password }}"
-        db: intake
-        privs: CREATE
-        type: database
-        obj: intake
-        role: intake
+
+    - name: Create Postgres Read-Only Replicant
+      rds:
+        command: replicate
+        region: "{{ region }}"
+        instance_name: "{{ project_slug }}-database-read-replicate"
+        source_instance: "{{ project_slug }}-database"
+      register: database-replicate
+
 
     - name: Create Metabass User with Privacy Preserving Access
       postgresql_user:
@@ -44,23 +44,12 @@
         schema: purged
         roles: metabase
 
-
-    - name: Create Postgres Read-Only Replicant
-      rds:
-        command: replicate
-        region: "{{ region }}"
-        instance_name: "{{ project_slug }}-database-readonly"
-        source_instance: "{{ project_slug }}-database"
-        wait: yes
-        wait_timeout: 99999999999
-      register: database-replicate
-
     - rds:
         command: facts
-        instance_name: "{{ project_slug }}-database-readonly"
+        instance_name: "{{ project_slug }}-database-read-replicate"
         region: "{{ region }}"
-      register: readonly-database
-      until: not(readonly-database.instance.endpoint is none)
+      register: readonlydatabase
+      until: not(readonlydatabase.instance.endpoint is none)
       retries: 20
       delay: 45
     - pause:
