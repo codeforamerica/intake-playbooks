@@ -38,10 +38,9 @@
         login_user: "{{ pg_app_username }}"
         login_password: "{{ pg_app_password }}"
         db: intake
-        privs: SELECT
-        type: table
-        objs: ALL_IN_SCHEMA
-        schema: purged
+        privs: USAGE
+        type: schema
+        objs: purged
         roles: metabase
 
     - rds:
