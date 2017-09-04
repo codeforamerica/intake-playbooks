@@ -204,7 +204,7 @@
                       ],
                       "Effect": "Allow",
                       "Resource": [
-                          "arn:aws:s3:::{{ project_slug }}-sync-{{ clone_from_project_slug is undefined | ternary(project_slug, clone_from_project_slug) }}"
+                          "arn:aws:s3:::{{ clone_from_project_slug is undefined | ternary(project_slug, clone_from_project_slug) }}-sync"
                       ]
                   },
                   {
@@ -215,14 +215,14 @@
                       ],
                       "Effect": "Allow",
                       "Resource": [
-                          "arn:aws:s3:::{{ project_slug }}-sync-{{ clone_from_project_slug is undefined | ternary(project_slug, clone_from_project_slug) }}/*"
+                          "arn:aws:s3:::{{ clone_from_project_slug is undefined | ternary(project_slug, clone_from_project_slug) }}-sync/*"
                       ]
                   }
               ],
               "Version": "2012-10-17"
           }
 
-    - name: Create Read-Only S3 permission for sync User to pull media bucket
+    - name: Create Read-Only S3 permission for sync User to pull original media bucket
       iam_policy:
         policy_name: "{{ project_slug }}-s3-readonly-from-{{ clone_from_project_slug }}"
         iam_name: "{{ project_slug }}-sync-s3-user"
@@ -239,7 +239,7 @@
                       ],
                       "Effect": "Allow",
                       "Resource": [
-                          "arn:aws:s3:::{{ project_slug }}-{{ clone_from_project_slug }}"
+                          "arn:aws:s3:::{{ clone_from_project_slug }}"
                       ]
                   },
                   {
@@ -248,7 +248,45 @@
                       ],
                       "Effect": "Allow",
                       "Resource": [
-                        "arn:aws:s3:::{{ project_slug }}-{{ clone_from_project_slug }}/*"
+                        "arn:aws:s3:::{{ clone_from_project_slug }}/*"
+                      ]
+                  }
+              ],
+              "Version": "2012-10-17"
+          }
+      when: clone_from_project_slug is defined
+
+    - name: Create Write S3 permission for sync User to push to the replica media bucket
+      iam_policy:
+        policy_name: "{{ project_slug }}-s3-media-sync-policy"
+        iam_name: "{{ project_slug }}-sync-s3-user"
+        iam_type: user
+        state: present
+        region: "{{ region }}"
+        policy_json: >
+          {
+              "Statement": [
+                  {
+                      "Action": [
+                          "s3:ListBucket",
+                          "s3:GetBucketLocation",
+                          "s3:ListBucketMultipartUploads",
+                          "s3:ListBucketVersions"
+                      ],
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:s3:::{{ project_slug }}"
+                      ]
+                  },
+                  {
+                      "Action": [
+                          "s3:*Object*",
+                          "s3:ListMultipartUploadParts",
+                          "s3:AbortMultipartUpload"
+                      ],
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:s3:::{{ project_slug }}/*"
                       ]
                   }
               ],
