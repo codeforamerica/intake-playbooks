@@ -123,9 +123,28 @@
 
     - name: Create S3 bucket for application media
       s3_bucket:
-        name: "{{ project_slug }}"
+        name: "{{ project_slug }}-media-files"
         state: present
-        versioning: yes
+        versioning: no
+
+    - name: Create S3 bucket for application static files
+      s3_bucket:
+        name: "{{ project_slug }}-static-files"
+        state: present
+        versioning: no
+        policy: >
+          {
+            "Version":"2012-10-17",
+            "Statement":[{
+              "Sid":"PublicReadGetObject",
+                  "Effect":"Allow",
+                "Principal": "*",
+                "Action":["s3:GetObject"],
+                "Resource":["arn:aws:s3:::{{ project_slug }}-static-files/*"
+                ]
+              }
+            ]
+          }
 
     - name: Create S3 User for Application
       iam:
@@ -134,9 +153,9 @@
         state: present
         access_key_state: create
 
-    - name: Create S3 permission for application user on media bucket
+    - name: Create S3 permission for application user on static bucket
       iam_policy:
-        policy_name: "{{ project_slug }}-s3-policy"
+        policy_name: "{{ project_slug }}-s3-static-policy"
         iam_name: "{{ project_slug }}-s3-user"
         iam_type: user
         state: present
@@ -153,7 +172,7 @@
                       ],
                       "Effect": "Allow",
                       "Resource": [
-                          "arn:aws:s3:::{{ project_slug }}"
+                          "arn:aws:s3:::{{ project_slug }}-static-files"
                       ]
                   },
                   {
@@ -164,7 +183,44 @@
                       ],
                       "Effect": "Allow",
                       "Resource": [
-                          "arn:aws:s3:::{{ project_slug }}/*"
+                          "arn:aws:s3:::{{ project_slug }}-static-files/*"
+                      ]
+                  }
+              ],
+              "Version": "2012-10-17"
+          }
+
+    - name: Create S3 permission for application user on media bucket
+      iam_policy:
+        policy_name: "{{ project_slug }}-s3-media-policy"
+        iam_name: "{{ project_slug }}-s3-user"
+        iam_type: user
+        state: present
+        region: "{{ region }}"
+        policy_json: >
+          {
+              "Statement": [
+                  {
+                      "Action": [
+                          "s3:ListBucket",
+                          "s3:GetBucketLocation",
+                          "s3:ListBucketMultipartUploads",
+                          "s3:ListBucketVersions"
+                      ],
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:s3:::{{ project_slug }}-media-files"
+                      ]
+                  },
+                  {
+                      "Action": [
+                          "s3:*Object*",
+                          "s3:ListMultipartUploadParts",
+                          "s3:AbortMultipartUpload"
+                      ],
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:s3:::{{ project_slug }}-media-files/*"
                       ]
                   }
               ],

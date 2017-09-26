@@ -9,7 +9,7 @@
   tasks:
     - fail:
         msg: "That was a close one!"
-      when: name_of_deploy != "{{ project_slug }}"
+      when: name_of_deploy != project_slug
 
     - name: Remove rds
       rds:
