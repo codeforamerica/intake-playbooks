@@ -1,0 +1,76 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - set_fact: time="{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
+    - set_fact: root_path="/tmp/intake-{{ time }}"
+    - set_fact: venv_path="{{ root_path }}/venv"
+    - set_fact: project_path="{{ root_path }}/intake"
+
+    - rds:
+        command: facts
+        instance_name: "{{ project_slug }}-database"
+        region: "{{ region }}"
+      register: database
+
+    - name: Create Project Directories
+      file:
+        path: "{{ root_path }}"
+        state: directory
+      file:
+        path: "{{ project_path }}"
+        state: directory
+
+    - name: Download Project
+      git:
+        repo: 'git@github.com:codeforamerica/intake.git'
+        dest: "{{ project_path }}"
+        version: feature/zappa_changes
+
+    - name: Install Project requirements
+      pip:
+        requirements: "{{ project_path }}/requirements/zappa.txt"
+        virtualenv: "{{ venv_path }}"
+        virtualenv_python: python3.6
+
+    - name: Install NPM requirements
+      shell: "npm install"
+      args:
+        chdir: "{{ project_path }}"
+
+    - name: Create Zappa Settings File
+      template:
+        src: templates/zappa_settings.json.j2
+        dest: "{{ project_path  }}/zappa_settings.json"
+
+    - name: Create Local Environment File
+      template:
+        src: templates/project-envs.j2
+        dest: "{{ project_path  }}/project-envs"
+
+    - name: Running Collectstatic
+      shell: "source project-envs && {{ venv_path }}/bin/python ./manage.py collectstatic --no-input --settings project.settings.development"
+      args:
+        chdir: "{{ project_path }}"
+        executable: /bin/bash
+
+    - name: Running Compressor
+      shell: "source project-envs && {{ venv_path }}/bin/python ./manage.py compress --engine jinja2 --extension jinja --settings project.settings.development"
+      args:
+        chdir: "{{ project_path }}"
+        executable: /bin/bash
+
+    - name: Update Lambda function
+      shell: "source project-envs && source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa update development"
+      args:
+        chdir: "{{ project_path }}"
+        executable: /bin/bash
+
+    - name: Run Migations
+      shell: "source project-envs && source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa manage development migrate"
+      args:
+        chdir: "{{ project_path }}"
+        executable: /bin/bash
+
+
