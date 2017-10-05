@@ -31,11 +31,10 @@
         version: feature/zappa_changes
 
     - name: Create virtualenv
-      shell: "virtualenv --no-site-packages -p/usr/bin/python3.6 {{ venv_path }}"
+      shell: "source PYTHONPATH=python3.6 && virtualenv --no-site-packages -p/usr/bin/python3.6 {{ venv_path }}"
       args:
-        chdir: "{{ project_path }}"
         executable: /bin/bash
-
+        
     - name: Install Project requirements
       pip:
         requirements: "{{ project_path }}/requirements/zappa.txt"
