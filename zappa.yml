@@ -36,7 +36,7 @@
         executable: /bin/bash
 
     - name: Install Project requirements
-      shell: "source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/pip install -r {{ project_path }}/requirements/zappa.txt"
+      shell: "export PYTHONPATH=python3.6 &&  source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/pip install -r {{ project_path }}/requirements/zappa.txt"
       args:
         executable: /bin/bash
 
