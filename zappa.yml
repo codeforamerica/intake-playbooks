@@ -36,9 +36,9 @@
         executable: /bin/bash
 
     - name: Install Project requirements
-      pip:
-        requirements: "{{ project_path }}/requirements/zappa.txt"
-        virtualenv: "{{ venv_path }}"
+      shell: "source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/pip install -r {{ project_path }}/requirements/zappa.txt"
+      args:
+        executable: /bin/bash
 
     - name: Install NPM requirements
       shell: "npm install"
