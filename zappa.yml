@@ -30,12 +30,16 @@
         dest: "{{ project_path }}"
         version: feature/zappa_changes
 
+    - name: Create virtualenv
+      shell: "virtualenv --no-site-packages -p/usr/bin/python3.6 {{ venv_path }}"
+      args:
+        chdir: "{{ project_path }}"
+        executable: /bin/bash
+
     - name: Install Project requirements
       pip:
         requirements: "{{ project_path }}/requirements/zappa.txt"
         virtualenv: "{{ venv_path }}"
-        virtualenv_command: /home/ubuntu/.local/bin/virtualenv
-        virtualenv_python: /usr/bin/python3.6
 
     - name: Install NPM requirements
       shell: "npm install"
