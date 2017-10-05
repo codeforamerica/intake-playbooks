@@ -33,7 +33,7 @@
         requirements: "{{ project_path }}/requirements/zappa.txt"
         virtualenv: "{{ venv_path }}"
         virtualenv_python: python3.6
-        virtualenv_command: python3.6 -m venv
+        virtualenv_command: /usr/bin/python3.6 -m venv
 
     - name: Install NPM requirements
       shell: "npm install"
