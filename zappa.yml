@@ -34,6 +34,7 @@
       pip:
         requirements: "{{ project_path }}/requirements/zappa.txt"
         virtualenv: "{{ venv_path }}"
+        virtualenv_command: /home/ubuntu/.local/bin/virtualenv
         virtualenv_python: /usr/bin/python3.6
 
     - name: Install NPM requirements
