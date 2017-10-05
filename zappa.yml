@@ -24,7 +24,7 @@
 
     - name: Download Project
       git:
-        repo: 'https://github.com/codeforamerica/intake-playbooks.git'
+        repo: 'https://github.com/codeforamerica/intake.git'
         dest: "{{ project_path }}"
         version: feature/zappa_changes
 
