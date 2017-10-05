@@ -14,10 +14,12 @@
         region: "{{ region }}"
       register: database
 
-    - name: Create Project Directories
+    - name: Create Root Directory
       file:
         path: "{{ root_path }}"
         state: directory
+
+    - name: Create Project Directories
       file:
         path: "{{ project_path }}"
         state: directory
