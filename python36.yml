@@ -1,0 +1,11 @@
+---
+
+- name: Add python 3.6 ppa
+  apt_repository:
+    repo: ppa:jonathonf/python-3.6
+    state: present
+
+- name: Install python 3.6 and upgrade
+  apt:
+    upgrade: yes
+    name: python3.6
