@@ -56,25 +56,25 @@
         dest: "{{ project_path  }}/project-envs"
 
     - name: Running Collectstatic
-      shell: "source project-envs && {{ venv_path }}/bin/python ./manage.py collectstatic --no-input --settings project.settings.development"
+      shell: "export PYTHONPATH=python3.6 &&  source project-envs && {{ venv_path }}/bin/python ./manage.py collectstatic --no-input --settings project.settings.development"
       args:
         chdir: "{{ project_path }}"
         executable: /bin/bash
 
     - name: Running Compressor
-      shell: "source project-envs && {{ venv_path }}/bin/python ./manage.py compress --engine jinja2 --extension jinja --settings project.settings.development"
+      shell: "export PYTHONPATH=python3.6 &&  source project-envs && {{ venv_path }}/bin/python ./manage.py compress --engine jinja2 --extension jinja --settings project.settings.development"
       args:
         chdir: "{{ project_path }}"
         executable: /bin/bash
 
     - name: Update Lambda function
-      shell: "source project-envs && source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa update development"
+      shell: "export PYTHONPATH=python3.6 &&  source project-envs && source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa update development"
       args:
         chdir: "{{ project_path }}"
         executable: /bin/bash
 
     - name: Run Migations
-      shell: "source project-envs && source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa manage development migrate"
+      shell: "export PYTHONPATH=python3.6 &&  source project-envs && source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa manage development migrate"
       args:
         chdir: "{{ project_path }}"
         executable: /bin/bash
