@@ -4,7 +4,7 @@
   gather_facts: no
   tasks:
     - set_fact: time="{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
-    - set_fact: root_path="{{  base_path  }}/intake-{{ time }}"
+    - set_fact: root_path="/tmp/intake-{{ time }}"
     - set_fact: venv_path="{{ root_path }}/venv"
     - set_fact: project_path="{{ root_path }}/intake"
 
@@ -30,17 +30,18 @@
         dest: "{{ project_path }}"
         version: feature/zappa_changes
 
-    - name: Create virtualenv
-      shell: "export PYTHONPATH=python3.6 && virtualenv --no-site-packages -p/usr/bin/python3.6 {{ venv_path }}"
-      args:
-        executable: /bin/bash
-
     - name: Install Project requirements
+      pip:
+        requirements: "{{ project_path }}/requirements/zappa.txt"
+        virtualenv: "{{ venv_path }}"
+        virtualenv_python: python3.6
+      environment:
+        PYTHONPATH: "python3.6"
+
+    - name: Install NPM requirements
       shell: "export PYTHONPATH=python3.6 &&  source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/pip install -r {{ project_path }}/requirements/zappa.txt"
       args:
         executable: /bin/bash
-
-    - name: Install NPM requirements
       shell: "npm install"
       args:
         chdir: "{{ project_path }}"
