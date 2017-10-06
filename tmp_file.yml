@@ -2,9 +2,10 @@
 - hosts: localhost
   connection: local
   gather_facts: no
-  - name: create a file on the localhost
-    copy:
-      content: ""
-      dest: /tmp/test.txt
-      force: no
-      mode: 0666
+  tasks:
+    - name: create a file on the localhost
+      copy:
+        content: ""
+        dest: /tmp/test.txt
+        force: no
+        mode: 0666
