@@ -53,24 +53,48 @@
         dest: "{{ project_path  }}/project-envs"
 
     - name: Running Collectstatic
-      shell: "source project-envs && {{ venv_path }}/bin/python ./manage.py collectstatic --no-input --settings project.settings.development"
+      shell: "{{ venv_path }}/bin/python ./manage.py collectstatic --no-input --settings project.settings.development"
       args:
         chdir: "{{ project_path }}"
         executable: /bin/bash
       environment:
         PYTHONPATH: "python3.6"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        SECRET_KEY: "{{ secret_key }}"
+        TEST_USER_PASSWORD: "{{ test_user_password }}"
+        DATABASE_HOST: "{{ database.instance.endpoint }}"
+        DATABASE_PASSWORD: "{{ pg_app_password }}"
+        PURGED_DATABASE_HOST: "{{ database.instance.endpoint }}"
+        PURGED_DATABASE_PASSWORD: "{{ pg_app_password }}"
+        AWS_ID: "{{ aws_id }}"
+        AWS_SECRkET: "{{ aws_secret }}"
+        STATIC_BUCKET: "{{ project_slug }}-static-files"
+        MEDIA_BUCKET: "{{ project_slug }}-media-files"
 
     - name: Running Compressor
-      shell: "source project-envs && {{ venv_path }}/bin/python ./manage.py compress --engine jinja2 --extension jinja --settings project.settings.development"
+      shell: "{{ venv_path }}/bin/python ./manage.py compress --engine jinja2 --extension jinja --settings project.settings.development"
       args:
         chdir: "{{ project_path }}"
         executable: /bin/bash
       environment:
         PYTHONPATH: "python3.6"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        SECRET_KEY: "{{ secret_key }}"
+        TEST_USER_PASSWORD: "{{ test_user_password }}"
+        DATABASE_HOST: "{{ database.instance.endpoint }}"
+        DATABASE_PASSWORD: "{{ pg_app_password }}"
+        PURGED_DATABASE_HOST: "{{ database.instance.endpoint }}"
+        PURGED_DATABASE_PASSWORD: "{{ pg_app_password }}"
+        AWS_ID: "{{ aws_id }}"
+        AWS_SECRkET: "{{ aws_secret }}"
+        STATIC_BUCKET: "{{ project_slug }}-static-files"
+        MEDIA_BUCKET: "{{ project_slug }}-media-files"
 
 
     - name: Update Lambda function
-      shell: "source project-envs && source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa update development"
+      shell: "source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa update development"
       args:
         chdir: "{{ project_path }}"
         executable: /bin/bash
@@ -78,19 +102,10 @@
         PYTHONPATH: "python3.6"
         AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-        SECRET_KEY: "{{ secret_key }}"
-        TEST_USER_PASSWORD: "{{ test_user_password }}"
-        DATABASE_HOST: "{{ database.instance.endpoint }}"
-        DATABASE_PASSWORD: "{{ pg_app_password }}"
-        PURGED_DATABASE_HOST: "{{ database.instance.endpoint }}"
-        PURGED_DATABASE_PASSWORD: "{{ pg_app_password }}"
-        AWS_ID: "{{ aws_id }}"
-        AWS_SECRkET: "{{ aws_secret }}"
-        STATIC_BUCKET: "{{ project_slug }}-static-files"
-        MEDIA_BUCKET: "{{ project_slug }}-media-files"
+
 
     - name: Run Migations
-      shell: "source project-envs && source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa manage development migrate"
+      shell: "source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa manage development migrate"
       args:
         chdir: "{{ project_path }}"
         executable: /bin/bash
@@ -98,16 +113,3 @@
         PYTHONPATH: "python3.6"
         AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-        SECRET_KEY: "{{ secret_key }}"
-        TEST_USER_PASSWORD: "{{ test_user_password }}"
-        DATABASE_HOST: "{{ database.instance.endpoint }}"
-        DATABASE_PASSWORD: "{{ pg_app_password }}"
-        PURGED_DATABASE_HOST: "{{ database.instance.endpoint }}"
-        PURGED_DATABASE_PASSWORD: "{{ pg_app_password }}"
-        AWS_ID: "{{ aws_id }}"
-        AWS_SECRkET: "{{ aws_secret }}"
-        STATIC_BUCKET: "{{ project_slug }}-static-files"
-        MEDIA_BUCKET: "{{ project_slug }}-media-files"
-
-
-
