@@ -47,11 +47,6 @@
         src: templates/zappa_settings.json.j2
         dest: "{{ project_path  }}/zappa_settings.json"
 
-    - name: Create Local Environment File
-      template:
-        src: templates/project-envs.j2
-        dest: "{{ project_path  }}/project-envs"
-
     - name: Running Collectstatic
       shell: "{{ venv_path }}/bin/python ./manage.py collectstatic --no-input --settings project.settings.development"
       args:
