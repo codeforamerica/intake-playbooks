@@ -7,11 +7,8 @@
     - set_fact: root_path="/tmp/intake-{{ time }}"
     - set_fact: venv_path="{{ root_path }}/venv"
     - set_fact: project_path="{{ root_path }}/intake"
-    - debug:
-        var="{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-    - debug:
-        var="{{ lookup('env','AWS_SECRET_ACCESS__KEY') }}"
-
+    - name: Test
+      shell: env
     - rds:
         command: facts
         instance_name: "{{ project_slug }}-database"
