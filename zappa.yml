@@ -68,7 +68,7 @@
         PURGED_DATABASE_HOST: "{{ database.instance.endpoint }}"
         PURGED_DATABASE_PASSWORD: "{{ pg_app_password }}"
         AWS_ID: "{{ aws_id }}"
-        AWS_SECRkET: "{{ aws_secret }}"
+        AWS_SECRET: "{{ aws_secret }}"
         STATIC_BUCKET: "{{ project_slug }}-static-files"
         MEDIA_BUCKET: "{{ project_slug }}-media-files"
 
@@ -88,7 +88,7 @@
         PURGED_DATABASE_HOST: "{{ database.instance.endpoint }}"
         PURGED_DATABASE_PASSWORD: "{{ pg_app_password }}"
         AWS_ID: "{{ aws_id }}"
-        AWS_SECRkET: "{{ aws_secret }}"
+        AWS_SECRET: "{{ aws_secret }}"
         STATIC_BUCKET: "{{ project_slug }}-static-files"
         MEDIA_BUCKET: "{{ project_slug }}-media-files"
 
