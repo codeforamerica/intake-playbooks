@@ -7,12 +7,11 @@
     - set_fact: root_path="/tmp/intake-{{ time }}"
     - set_fact: venv_path="{{ root_path }}/venv"
     - set_fact: project_path="{{ root_path }}/intake"
-    - set_fact: aws_zappa_id="{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
     - debug:
-        var=aws_zappa__id
-    - set_fact: aws_zappa_secret="{{ lookup('env','AWS_SECRET_ACCESS__KEY') }}"
+        var="{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
     - debug:
-        var=aws_zappa_secret
+        var="{{ lookup('env','AWS_SECRET_ACCESS__KEY') }}"
+
     - rds:
         command: facts
         instance_name: "{{ project_slug }}-database"
