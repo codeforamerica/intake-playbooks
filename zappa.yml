@@ -7,8 +7,6 @@
     - set_fact: root_path="/tmp/intake-{{ time }}"
     - set_fact: venv_path="{{ root_path }}/venv"
     - set_fact: project_path="{{ root_path }}/intake"
-    - name: Test
-      shell: env
     - rds:
         command: facts
         instance_name: "{{ project_slug }}-database"
@@ -80,6 +78,16 @@
         PYTHONPATH: "python3.6"
         AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        SECRET_KEY: "{{ secret_key }}"
+        TEST_USER_PASSWORD: "{{ test_user_password }}"
+        DATABASE_HOST: "{{ database.instance.endpoint }}"
+        DATABASE_PASSWORD: "{{ pg_app_password }}"
+        PURGED_DATABASE_HOST: "{{ database.instance.endpoint }}"
+        PURGED_DATABASE_PASSWORD: "{{ pg_app_password }}"
+        AWS_ID: "{{ aws_id }}"
+        AWS_SECRkET: "{{ aws_secret }}"
+        STATIC_BUCKET: "{{ project_slug }}-static-files"
+        MEDIA_BUCKET: "{{ project_slug }}-media-files"
 
     - name: Run Migations
       shell: "source project-envs && source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa manage development migrate"
@@ -90,5 +98,16 @@
         PYTHONPATH: "python3.6"
         AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        SECRET_KEY: "{{ secret_key }}"
+        TEST_USER_PASSWORD: "{{ test_user_password }}"
+        DATABASE_HOST: "{{ database.instance.endpoint }}"
+        DATABASE_PASSWORD: "{{ pg_app_password }}"
+        PURGED_DATABASE_HOST: "{{ database.instance.endpoint }}"
+        PURGED_DATABASE_PASSWORD: "{{ pg_app_password }}"
+        AWS_ID: "{{ aws_id }}"
+        AWS_SECRkET: "{{ aws_secret }}"
+        STATIC_BUCKET: "{{ project_slug }}-static-files"
+        MEDIA_BUCKET: "{{ project_slug }}-media-files"
+
 
 
