@@ -7,12 +7,6 @@
     - set_fact: root_path="/tmp/intake-{{ time }}"
     - set_fact: venv_path="{{ root_path }}/venv"
     - set_fact: project_path="{{ root_path }}/intake"
-    - set_fact: secret_key="{{ lookup('env','AWS_ACCESS_KEY') }}"
-    - shell: env
-      register: ps
-    - debug: var=ps.stdout_lines
-    - name: Dump all vars
-      action: template src=templates/dumpall.j2 dest=/project/ansible.all
     - rds:
         command: facts
         instance_name: "{{ project_slug }}-database"
