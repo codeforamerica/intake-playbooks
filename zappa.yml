@@ -76,8 +76,8 @@
         executable: /bin/bash
       environment:
         PYTHONPATH: "python3.6"
-        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY') }}"
-        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_KEY') }}"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS__KEY') }}"
 
     - name: Run Migations
       shell: "source project-envs && source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa manage development migrate"
@@ -86,7 +86,7 @@
         executable: /bin/bash
       environment:
         PYTHONPATH: "python3.6"
-        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY') }}"
-        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_KEY') }}"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS__KEY') }}"
 
 
