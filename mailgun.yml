@@ -1,0 +1,47 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name:  Mailgun SPF TXT
+      route53:
+        command: create
+        zone: "{{ hosted_zone }}"
+        record: "{{ domain }}"
+        type: TXT
+        ttl: 60
+        value: '"v=spf1 include:mailgun.org ~all"'
+        wait: yes
+
+    - name:  Mailgun DKIM TXT
+      route53:
+        command: create
+        zone: "{{ hosted_zone }}"
+        record: "smtp._domainkey.{{ domain }}"
+        type: TXT
+        ttl: 60
+        value: '"{{ mailgun_dkim_rsa }}"'
+        wait: yes
+      when: mailgun_dkim_rsa is defined
+
+    - name:  Mailgun Tracking CNAME
+      route53:
+        command: create
+        zone: "{{ hosted_zone }}"
+        record: "email.{{ domain }}"
+        type: CNAME
+        ttl: 60
+        value: "mailgun.org"
+        wait: yes
+
+    - name:  Mailgun MX Records
+      route53:
+        command: create
+        zone: "{{ hosted_zone }}"
+        record: "{{ domain }}"
+        type: MX
+        ttl: 60
+        value:
+          - "10 mxa.mailgun.org"
+          - "10 mxb.mailgun.org"
+        wait: yes

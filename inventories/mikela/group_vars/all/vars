@@ -1,0 +1,10 @@
+---
+project: "Clear My Record[development mikela]"
+project_slug: cmr-mikela-r1
+region: us-east-1
+az: us-east-1a
+az2: us-east-1b
+pg_username: postgres
+pg_fs_size: 5
+pg_instance_type: db.t2.small
+pg_app_username: intake
