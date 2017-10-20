@@ -1,8 +1,10 @@
 {
-    "development": {
-        "aws_region": "us-east-1",
-        "django_settings": "project.settings.development",
-        "s3_bucket": "{{ project_slug }}-zappa",
+  "development": {
+    "aws_region": "us-east-1",
+    "django_settings": "project.settings.development",
+	  "domain": "{{ domain }}"
+    "certificate_arn": "{{ certificate_arn }}",
+	  "s3_bucket": "{{ project_slug }}-zappa",
 	  "environment_variables": {
 	    "SECRET_KEY" :"{{ secret_key }}",
 	    "TEST_USER_PASSWORD": "{{ test_user_password }}",
