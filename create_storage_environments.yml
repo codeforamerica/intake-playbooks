@@ -190,6 +190,10 @@
               "Version": "2012-10-17"
           }
 
+    - name: Set CORS on S3 bucket
+      command: >
+        aws s3api put-bucket-cors --bucket {{ project_slug }}-static-files  --cors-configuration '{ "CORSRules": [ { "AllowedHeaders": [ "Authorization" ], "AllowedMethods": [ "GET" ], "AllowedOrigins": [ "https://{{ domain }}" ], "MaxAgeSeconds": 3000 } ] }'
+
     - name: Create S3 permission for application user on media bucket
       iam_policy:
         policy_name: "{{ project_slug }}-s3-media-policy"
