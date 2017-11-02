@@ -2,9 +2,10 @@
   "development": {
     "aws_region": "us-east-1",
     "django_settings": "project.settings.development",
-	  "domain": "{{ domain }}"
+	"domain": "{{ domain }}",
     "certificate_arn": "{{ certificate_arn }}",
 	  "s3_bucket": "{{ project_slug }}-zappa",
+	  "cors": true,
 	  "environment_variables": {
 	    "SECRET_KEY" :"{{ secret_key }}",
 	    "TEST_USER_PASSWORD": "{{ test_user_password }}",
@@ -14,7 +15,7 @@
 	    "PURGED_DATABASE_PASSWORD": "{{ pg_app_password }}",
 	    "AWS_ID": "{{ aws_id }}",
 	    "AWS_SECRET": "{{ aws_secret }}",
-	    "STATIC_BUCKET": "{{ project_slug }}-static-files"
+	    "STATIC_BUCKET": "{{ project_slug }}-static-files",
 	    "MEDIA_BUCKET": "{{ project_slug }}-media-files"
 	  },
   "exclude": ["node_modules", "static", "media", "staticfiles-cache", "tests", "fixtures"]
