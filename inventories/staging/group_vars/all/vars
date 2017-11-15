@@ -3,6 +3,8 @@ project: "Clear My Record[staging]"
 project_slug: cmr-staging-r1
 hosted_zone: clearmyrecord.org
 domain: staging.clearmyrecord.org
+environment_name: staging
+settings_name: prod
 region: us-east-1
 az: us-east-1a
 az2: us-east-1b

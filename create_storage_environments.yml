@@ -10,7 +10,8 @@
         name: "{{ project_slug }}-vpc"
         region: "{{ region }}"
         cidr_block: 10.0.0.0/16
-        resource_tags: '{"Name":"{{ project_slug }}_vpc"}'
+        resource_tags:
+          Name: "{{ project_slug }}_vpc"
       register: vpc
 
     - name: "Create {{ project_slug }} public subnet"
@@ -20,18 +21,22 @@
         region: "{{ region }}"
         az: "{{ az }}"
         cidr: 10.0.0.0/24
-        resource_tags: '{"Name": "{{ project_slug }}_subnet_public"}'
+        resource_tags:
+          Name: "{{ project_slug }}_subnet_public"
+          Type: "public"
       register: subnet_public
 
-    - name: "Create  {{ project_slug }} public subnet 2"
+    - name: "Create {{ project_slug }} public subnet2"
       ec2_vpc_subnet:
         state: present
         vpc_id: "{{ vpc.vpc.id }}"
         region: "{{ region }}"
         az: "{{ az2 }}"
         cidr: 10.0.1.0/24
-        resource_tags: '{"Name": "{{ project_slug }}_subnet_public2"}'
-      register: "subnet_public2"
+        resource_tags:
+          Name: "{{ project_slug }}_subnet_public2"
+          Type: "public"
+      register: subnet_public2
 
     - name: "Create IGW"
       ec2_vpc_igw:
@@ -55,17 +60,17 @@
             gateway_id: "{{ igw.gateway_id }}"
       register: public_route_table
 
-    - name: "Create and associate production DMZ network ACL with DMZ subnets"
+    - name: Create  NACL for public subjects
       ec2_vpc_nacl:
         vpc_id: "{{ vpc.vpc.id }}"
-        name: "{{ project_slug }}-nacl"
+        name: "{{ project_slug }}-nacl-public"
         region: "{{ region }}"
-        subnets: ["{{ project_slug }}_subnet_public", "{{ project_slug }}_subnet_public2"]
+        subnets: ["{{ project_slug }}_subnet_public"]
 
         ingress: [
             # rule no, protocol, allow/deny, cidr, icmp_code, icmp_type,
             #                                             port from, port to
-            [100, 'tcp', 'allow', '0.0.0.0/0', null, null, 5432, 5432],
+            [100, 'all', 'allow', '0.0.0.0/0', null, null, null, null]
         ]
         egress: [
             [100, 'all', 'allow', '0.0.0.0/0', null, null, null, null]
@@ -81,6 +86,7 @@
         cidr: 10.0.2.0/24
         resource_tags:
           Name: "{{ project_slug }}_subnet_private"
+          Type: "private"
       register: "subnet_private"
 
     - name: Create private subnet2
@@ -92,7 +98,72 @@
         cidr: 10.0.3.0/24
         resource_tags:
           Name: "{{ project_slug }}_subnet_private2"
+          Type: "private"
       register: "subnet_private2"
+
+    - name: Create new NAT gateway in public subnet and allocate new EIP
+      ec2_vpc_nat_gateway:
+        state: present
+        subnet_id: "{{ subnet_public.subnet.id }}"
+        wait: yes
+        region: "{{ region }}"
+        if_exist_do_not_create: true
+      register: nat_gateway
+
+    - name: Create new NAT gateway in public subnet2 and allocate new EIP
+      ec2_vpc_nat_gateway:
+        state: present
+        subnet_id: "{{ subnet_public2.subnet.id }}"
+        wait: yes
+        region: "{{ region }}"
+        if_exist_do_not_create: true
+      register: nat_gateway2
+
+    - name: Set up private subnet route table
+      ec2_vpc_route_table:
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        tags:
+          Name: "{{ project_slug }}_private_route"
+        subnets:
+          - "{{ subnet_private.subnet.id }}"
+
+        routes:
+          - dest: 0.0.0.0/0
+            gateway_id: "{{ nat_gateway.nat_gateway_id }}"
+      register: private_route_table
+
+    - name: Set up private subnet route table2
+      ec2_vpc_route_table:
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        tags:
+          Name: "{{ project_slug }}_private_route2"
+        subnets:
+          - "{{ subnet_private2.subnet.id }}"
+
+        routes:
+          - dest: 0.0.0.0/0
+            gateway_id: "{{ nat_gateway2.nat_gateway_id }}"
+      register: private_route_table
+
+    - name: Create  NACL for private subjects
+      ec2_vpc_nacl:
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: "{{ project_slug }}-nacl-private"
+        region: "{{ region }}"
+        subnets: ["{{ project_slug }}_subnet_private", "{{ project_slug }}_subnet_private2"]
+
+        ingress: [
+            # rule no, protocol, allow/deny, cidr, icmp_code, icmp_type,
+            #                                             port from, port to
+            [100, 'all', 'allow', '0.0.0.0/0', null, null, null, null]
+        ]
+        egress: [
+            [100, 'all', 'allow', '0.0.0.0/0', null, null, null, null]
+        ]
+        state: 'present'
+
 
     - name: Create RDS subnet group
       rds_subnet_group:
@@ -103,8 +174,6 @@
         subnets:
           - "{{ subnet_public.subnet.id }}"
           - "{{ subnet_public2.subnet.id }}"
-          - "{{ subnet_private.subnet.id }}"
-          - "{{ subnet_private2.subnet.id }}"
       register: "rds_subnet_group"
 
     - name: Create database security group
@@ -151,7 +220,20 @@
         iam_type: user
         name: "{{ project_slug }}-s3-user"
         state: present
-        access_key_state: create
+      register: s3_user
+
+    - name: Create Keys for S3 User for Application
+      command: "aws iam create-access-key --user-name {{ project_slug }}-s3-user"
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+      register: s3_user_keys
+    - set_fact:
+        s3_user_keys: "{{ s3_user_keys.stdout|from_json }}"
+    - set_fact:
+        aws_id:  "{{ s3_user_keys.AccessKey.AccessKeyId }}"
+    - set_fact:
+        aws_secret:  "{{ s3_user_keys.AccessKey.SecretAccessKey }}"
 
     - name: Create S3 permission for application user on static bucket
       iam_policy:
@@ -193,6 +275,9 @@
     - name: Set CORS on S3 bucket
       command: >
         aws s3api put-bucket-cors --bucket {{ project_slug }}-static-files  --cors-configuration '{ "CORSRules": [ { "AllowedHeaders": [ "Authorization" ], "AllowedMethods": [ "GET" ], "AllowedOrigins": [ "https://{{ domain }}" ], "MaxAgeSeconds": 3000 } ] }'
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 
     - name: Create S3 permission for application user on media bucket
       iam_policy:
@@ -370,6 +455,9 @@
         --no-multi-az
         --publicly-accessible
         --storage-encrypted"
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
       register: result
       failed_when: >
         result.rc != 0 and ('DBInstanceAlreadyExists' not in result.stderr)
@@ -415,3 +503,5 @@
         type: database
         obj: intake
         role: intake
+
+

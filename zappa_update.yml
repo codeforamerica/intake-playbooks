@@ -1,0 +1,16 @@
+---
+- include: includes/pre_zappa.yml
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Update Lambda function
+      shell: "source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa update {{ environment_name }}"
+      args:
+        chdir: "{{ project_path }}"
+        executable: /bin/bash
+      environment:
+        PYTHONPATH: "python3.6"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+- include: includes/post_zappa.yml

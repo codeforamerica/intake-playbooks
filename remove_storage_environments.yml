@@ -81,8 +81,15 @@
 
     - name: Remove S3 bucket
       s3_bucket:
-        name: "{{ project_slug }}"
+        name: "{{ project_slug }}-static-files"
         state: absent
+        force: yes
+
+    - name: Remove S3 bucket
+      s3_bucket:
+        name: "{{ project_slug }}-media-files"
+        state: absent
+        force: yes
 
     - name: Get VPC
       ec2_vpc_net:
@@ -109,6 +116,36 @@
           Name: "{{ project_slug }}_public_route"
         state: absent
 
+    - name: Remove private subnet route table
+      ec2_vpc_route_table:
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        tags:
+          Name: "{{ project_slug }}_private_route"
+        state: absent
+
+    - name: Get Public Subnets
+      ec2_vpc_subnet_facts:
+        region: "{{ region }}"
+        filters:
+          vpc_id: "{{ vpc.vpc.id }}"
+          "tag:Type": "public"
+      register: public_subnets
+
+    - name: Get all nat gateways
+      ec2_vpc_nat_gateway_facts:
+        region: "{{ region }}"
+        filters:
+          vpc-id: "{{ vpc.vpc.id }}"
+      register: nat_gateways
+
+    - name: Remove NAT Gateways
+      ec2_vpc_nat_gateway:
+        state: absent
+        nat_gateway_id: "{{ item.nat_gateway_id }}"
+        wait: yes
+      with_items: "{{ nat_gateways.result }}"
+
     - name: Remove public subnet
       ec2_vpc_subnet:
         state: absent
@@ -117,7 +154,7 @@
         region: "{{ region }}"
         cidr: 10.0.0.0/24
 
-    - name: Remove second  public subnet
+    - name: Remove  public subnet2
       ec2_vpc_subnet:
         state: absent
         vpc_id: "{{ vpc.vpc.id }}"
@@ -152,6 +189,13 @@
         state: absent
         vpc_id: "{{ vpc.vpc.id }}"
         name: "{{ project_slug }}-nacl"
+        region: "{{ region }}"
+
+    - name: Remove Private NACL
+      ec2_vpc_nacl:
+        state: absent
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: "{{ project_slug }}-nacl-public"
         region: "{{ region }}"
 
     - name: Remove vpc

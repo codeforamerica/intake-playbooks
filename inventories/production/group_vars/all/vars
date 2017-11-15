@@ -1,10 +1,11 @@
 ---
-project: "Clear My Record"
+project: "Clear My Record[production]"
 project_slug: cmr-production-r1
 hosted_zone: clearmyrecord.org
-domain: clearmyrecord.org
+domain: www.clearmyrecord.org
+environment_name: production
+settings_name: prod
 region: us-east-1
-prefix: production
 az: us-east-1a
 az2: us-east-1b
 pg_username: postgres

@@ -1,28 +1,9 @@
 ---
+- include: build_project_dir.yml
 - hosts: localhost
   connection: local
   gather_facts: no
   tasks:
-    - set_fact: time="{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
-    - set_fact: root_path="/tmp/intake-{{ time }}"
-    - set_fact: venv_path="{{ root_path }}/venv"
-    - set_fact: project_path="{{ root_path }}/intake"
-    - rds:
-        command: facts
-        instance_name: "{{ project_slug }}-database"
-        region: "{{ region }}"
-      register: database
-
-    - name: Create Root Directory
-      file:
-        path: "{{ root_path }}"
-        state: directory
-
-    - name: Create Project Directories
-      file:
-        path: "{{ project_path }}"
-        state: directory
-
     - name: Download Project
       git:
         repo: 'https://github.com/codeforamerica/intake.git'
@@ -42,9 +23,27 @@
       args:
         chdir: "{{ project_path }}"
 
+    - name: Create Security Group for Lambda Application
+      ec2_group:
+        name: "{{ project_slug }}-lambda-security-group"
+        description: an example EC2 group
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        state: present
+        rules:
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 443
+            to_port: 443
+            cidr_ip: 0.0.0.0/0
+      register: "lambda_sg"
+
     - name: Create Zappa Settings File
       template:
-        src: templates/zappa_settings.json.j2
+        src: ../templates/zappa_settings.json.j2
         dest: "{{ project_path  }}/zappa_settings.json"
 
     - name: Running Collectstatic
@@ -87,24 +86,3 @@
         STATIC_BUCKET: "{{ project_slug }}-static-files"
         MEDIA_BUCKET: "{{ project_slug }}-media-files"
 
-
-    - name: Update Lambda function
-      shell: "source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa update development"
-      args:
-        chdir: "{{ project_path }}"
-        executable: /bin/bash
-      environment:
-        PYTHONPATH: "python3.6"
-        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-
-
-    - name: Run Migations
-      shell: "source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa manage development migrate"
-      args:
-        chdir: "{{ project_path }}"
-        executable: /bin/bash
-      environment:
-        PYTHONPATH: "python3.6"
-        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"

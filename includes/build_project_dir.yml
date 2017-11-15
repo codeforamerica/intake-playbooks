@@ -1,0 +1,25 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - set_fact: time="{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
+    - set_fact: root_path="/tmp/intake-{{ time }}"
+    - set_fact: venv_path="{{ root_path }}/venv"
+    - set_fact: project_path="{{ root_path }}/intake"
+    - rds:
+        command: facts
+        instance_name: "{{ project_slug }}-database"
+        region: "{{ region }}"
+      register: database
+
+    - name: Create Root Directory
+      file:
+        path: "{{ root_path }}"
+        state: directory
+
+    - name: Create Project Directories
+      file:
+        path: "{{ project_path }}"
+        state: directory
+
