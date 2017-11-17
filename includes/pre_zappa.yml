@@ -10,6 +10,19 @@
         dest: "{{ project_path }}"
         version: feature/zappa_changes
 
+    - set_fact:
+        compiled_environment_variables:
+          DATABASE_HOST: "{{ database.instance.endpoint }}"
+          DATABASE_PASSWORD: "{{ pg_app_password }}"
+          PURGED_DATABASE_HOST: "{{ database.instance.endpoint }}"
+          PURGED_DATABASE_PASSWORD: "{{ pg_app_password }}"
+          AWS_ID: "{{ aws_id }}"
+          AWS_SECRET: "{{ aws_secret }}"
+    - set_fact:
+        lambda_environment:
+          Variables:
+            "{{ environment_variables|combine(secret_environment_variables)|combine(compiled_environment_variables) }}"
+
     - name: Install Project requirements
       pip:
         requirements: "{{ project_path }}/requirements/zappa.txt"
@@ -40,6 +53,7 @@
             to_port: 443
             cidr_ip: 0.0.0.0/0
       register: "lambda_sg"
+
 
     - name: Create Zappa Settings File
       template:
