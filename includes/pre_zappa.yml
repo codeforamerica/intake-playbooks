@@ -54,7 +54,6 @@
             cidr_ip: 0.0.0.0/0
       register: "lambda_sg"
 
-
     - name: Create Zappa Settings File
       template:
         src: ../templates/zappa_settings.json.j2

@@ -23,12 +23,32 @@
         AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 
+    - name: Create Keys for S3 User for Application
+      command: "aws iam create-access-key --user-name {{ project_slug }}-s3-user"
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+      register: s3_user_keys
+    - set_fact:
+        s3_user_keys: "{{ s3_user_keys.stdout|from_json }}"
+    - set_fact:
+        aws_id:  "{{ s3_user_keys.AccessKey.AccessKeyId }}"
+    - set_fact:
+        aws_secret:  "{{ s3_user_keys.AccessKey.SecretAccessKey }}"
+
     - name: Set Environment Variables on Lambda function
       command: "aws lambda update-function-configuration  --function-name intake-{{ environment_name }}  --environment '{{ lambda_environment|to_json }}'"
       environment:
         AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
       register: s3_user_keys
+
+    - name: Delete Old Key for S3 User for Application
+      command: "aws iam delete-access-key --access-key {{ s3_user.user_meta.access_keys[0].access_key_id }} --user-name {{ project_slug }}-s3-user"
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+
 
     - name: Create Certificate and setup Domain
       shell: "source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa certify {{ environment_name }} --yes"
@@ -41,4 +61,3 @@
         AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 
 - include: includes/post_zappa.yml
-
