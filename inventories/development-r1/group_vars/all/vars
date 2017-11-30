@@ -1,0 +1,32 @@
+---
+project: "Clear My Record[development]"
+project_slug: cmr-development-r1
+environment_name: development
+settings_name: prod
+hosted_zone: dev.clearmyrecord.org
+domain: dev.clearmyrecord.org
+region: us-east-1
+az: us-east-1a
+az2: us-east-1b
+pg_username: postgres
+pg_fs_size: 5
+pg_instance_type: db.t2.small
+pg_app_username: intake
+certificate_arn: "arn:aws:acm:us-east-1:007849073905:certificate/316a2cc3-4fed-4081-863e-1930fd34e979"
+base_path: /tmp
+static_bucket: "{{ project_slug }}-static-files"
+media_bucket: "{{ project_slug }}-media-files"
+
+environment_variables:
+  ALLOWED_HOSTS: "*"
+  STATIC_BUCKET: "{{ project_slug }}-static-files"
+  MEDIA_BUCKET: "{{ project_slug }}-media-files"
+  FRONT_EMAIL_CHANNEL_ID: cha_ok0
+  FRONT_PHONE_CHANNEL_ID: cha_nx8
+  LIVE_COUNTY_CHOICES: "1"
+  MAIL_DEFAULT_SENDER: no-reply@dev.clearmyrecord.org
+  DEFAULT_HOST: https://dev.clearmyrecord.org
+  DIVERT_REMOTE_CONNECTIONS: "False"
+  VOICEMAIL_NOTIFICATION_EMAIL: cmrtestuser@gmail.com
+  PURGED_DATABASE_USER: intake
+  PARTNERSHIPS_LEAD_INBOX: cmrtestuser+partnerships@gmail.com
