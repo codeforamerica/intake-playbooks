@@ -437,6 +437,7 @@
         --master-username {{ pg_username }}
         --master-user-password {{ pg_password }}
         --vpc-security-group-ids {{ rds_sg.group_id }}
+        --region {{ region }}
         --availability-zone {{ az }}
         --db-subnet-group-name {{ project_slug }}-rds-subnet-group
         --auto-minor-version-upgrade
