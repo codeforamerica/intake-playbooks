@@ -4,7 +4,7 @@
   gather_facts: no
 
   tasks:
-    - name: "Create {{ project }} {{ project_slug }} VPC"
+    - name: "Create {{ project_slug }} VPC"
       ec2_vpc_net:
         state: present
         name: "{{ project_slug }}-vpc"

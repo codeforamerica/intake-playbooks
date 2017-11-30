@@ -1,5 +1,6 @@
 ---
 - include: includes/build_project_dir.yml
+- include: includes/create_zappa_settings.yml
 - hosts: localhost
   connection: local
   gather_facts: no
@@ -11,20 +12,6 @@
         virtualenv_python: python3.6
       environment:
         PYTHONPATH: "python3.6"
-
-    - name: Create Zappa Settings File
-      template:
-        src: ../templates/undeploy_zappa_settings.json.j2
-        dest: "{{ project_path  }}/zappa_settings.json"
-
-    - name: Get VPC(will create if it doesn't exist, which isn't great)
-      ec2_vpc_net:
-        state: present
-        name: "{{ project_slug }}-vpc"
-        region: "{{ region }}"
-        cidr_block: 10.0.0.0/16
-        resource_tags: '{"Name":"{{ project_slug }}_vpc"}'
-      register: vpc
 
     - name: Undeploy from Lambda
       shell: "source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa undeploy {{ environment_name }} --yes"

@@ -1,5 +1,6 @@
 ---
 - include: includes/pre_zappa.yml
+
 - hosts: localhost
   connection: local
   gather_facts: no

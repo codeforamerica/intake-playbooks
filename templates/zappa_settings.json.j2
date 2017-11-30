@@ -2,7 +2,9 @@
   "{{ environment_name }}": {
     "vpc_config": {
       "SubnetIds": [
-        "{{ subnet_private.subnet.id }}"
+        {% for subnet in private_subnets.subnets %}
+        "{{ subnet.id }}",
+        {% endfor %}
       ],
       "SecurityGroupIds": [
        "{{ lambda_sg.group_id }}"

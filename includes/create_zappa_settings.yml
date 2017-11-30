@@ -1,0 +1,36 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Get VPC(will create if it doesn't exist, which isn't great)
+      ec2_vpc_net:
+        state: present
+        name: "{{ project_slug }}-vpc"
+        region: "{{ region }}"
+        cidr_block: 10.0.0.0/16
+      register: vpc
+
+    - name: Get Security Group for Lambda Application[creates if doesn't exist]
+      ec2_group:
+        name: "{{ project_slug }}-lambda-security-group"
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        description: an example EC2 group
+        state: present
+      register: "lambda_sg"
+
+    - name: Get Private Subnets
+      ec2_vpc_subnet_facts:
+        region: "{{ region }}"
+        filters:
+          vpc_id: "{{ vpc.vpc.id }}"
+          "tag:Name": "{{ project_slug }}_subnet_private"
+      register: private_subnets
+
+    - name: Create Zappa Settings File
+      template:
+        src: ../templates/zappa_settings.json.j2
+        dest: "{{ project_path  }}/zappa_settings.json"
+
+
