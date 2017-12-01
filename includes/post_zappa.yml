@@ -48,3 +48,15 @@
         AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 
+    - name: Zappa Status from Lambda
+      shell: "source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa status {{ environment_name }}"
+      args:
+        chdir: "{{ project_path }}"
+        executable: /bin/bash
+      environment:
+        PYTHONPATH: "python3.6"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+      register: zappa_status
+    - debug: var=zappa_status.stdout_lines
+
