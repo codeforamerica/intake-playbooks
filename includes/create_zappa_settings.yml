@@ -25,7 +25,7 @@
         region: "{{ region }}"
         filters:
           vpc_id: "{{ vpc.vpc.id }}"
-          "tag:Name": "{{ project_slug }}_subnet_private"
+          "tag:Type": "private"
       register: private_subnets
 
     - name: Create Zappa Settings File

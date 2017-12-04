@@ -1,0 +1,68 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Get VPC
+      ec2_vpc_net:
+        state: present
+        name: "{{ project_slug }}-vpc"
+        region: "{{ region }}"
+        cidr_block: 10.0.0.0/16
+        resource_tags: '{"Name":"{{ project_slug }}_vpc"}'
+      register: vpc
+
+    - name: Create  NACL for public subjects
+      ec2_vpc_nacl:
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: "{{ project_slug }}-nacl-public"
+        region: "{{ region }}"
+        subnets: ["{{ project_slug }}_subnet_public"]
+
+        ingress: [
+            # rule no, protocol, allow/deny, cidr, icmp_code, icmp_type,
+            #                                             port from, port to
+            [100, 'all', 'allow', '0.0.0.0/0', null, null, 80, 80],
+            [100, 'all', 'allow', '0.0.0.0/0', null, null, 443, 443]
+        ]
+        egress: [
+            [100, 'all', 'allow', '0.0.0.0/0', null, null, null, null]
+        ]
+        state: 'present'
+
+    - name: Create  NACL for private subjects
+      ec2_vpc_nacl:
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: "{{ project_slug }}-nacl-private"
+        region: "{{ region }}"
+        subnets: ["{{ project_slug }}_subnet_private", "{{ project_slug }}_subnet_private2"]
+
+        ingress: [
+            # rule no, protocol, allow/deny, cidr, icmp_code, icmp_type,
+            #                                             port from, port to
+            [100, 'all', 'allow', '0.0.0.0/0', null, null, 80, 80],
+            [100, 'all', 'allow', '0.0.0.0/0', null, null, 443, 443]
+        ]
+        egress: [
+            [100, 'all', 'allow', '0.0.0.0/0', null, null, null, null]
+        ]
+        state: 'present'
+
+    - name: Get Private Subnets
+      ec2_vpc_subnet_facts:
+        region: "{{ region }}"
+        filters:
+          vpc_id: "{{ vpc.vpc.id }}"
+          "tag:Type": "private"
+      register: private_subnets
+
+    - name: Create RDS subnet group
+      rds_subnet_group:
+        region: "{{ region }}"
+        state: present
+        name: "{{ project_slug }}-rds-subnet-group"
+        description: "Database subnet for {{ project_slug }} instance of {{ project }}"
+        subnets:
+          "{{ private_subnets.subnets|map(attribute='id')|list }}"
+      register: "rds_subnet_group"
+
