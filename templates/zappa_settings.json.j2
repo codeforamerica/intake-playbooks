@@ -1,5 +1,4 @@
-{
-  "{{ environment_name }}": {
+{"{{ environment_name }}": {
     "vpc_config": {
       "SubnetIds": [
         {% for subnet in private_subnets.subnets %}
@@ -16,6 +15,16 @@
     "certificate_arn": "{{ certificate_arn }}",
     "s3_bucket": "{{ project_slug }}-zappa",
     "exclude": ["node_modules", "static", "media", "staticfiles-cache", "tests"],
-    "events": []
+    "xray_tracing": true,
+    "events": [
+      {
+        "function": "zappa_scheduled_tasks.send_unopened_apps_notification",
+        "expression": "cron(0 14 * * ? *)"
+      },
+      {
+        "function": "zappa_scheduled_tasks.send_followups",
+        "expression": "cron(0 19 * * ? *)"
+      },
+    ]
 }}
 
