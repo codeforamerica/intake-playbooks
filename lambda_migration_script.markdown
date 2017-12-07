@@ -1,34 +1,3 @@
-- Write UAT script for Prod
-
-
-Day1
-- Run Ansible playbook deploy zappa to spin up Staing and Production
-- Validate database settings and turn any special needed.
-- Light UAT
-- Run download and upload data commands from Production to new Production
-- Full UAT
-- Go into maintence mode
-- Do a manual database snapshot
-
-- Run download and upload data commands from Production to new Production
-
-- clearmyrecord.codeforamerica.org DNS and set to redirect to clearmyrecord.org
-- Do thing to immediately redirect
-
-Day2-3
-- Check traffic on old site/domain/bucket
-- Check the new Production is working
-
-Eventually
-- Turn off old site completely
-
-Even further
-- Delete everything on Heroku
-
-
-
------- ignore above ------
-
 Before Day 1
 - Set ttl for clearmyrecord.codeforamerica.org to 60sec
   - Make sure DNS in route53 is set low as well
@@ -67,7 +36,7 @@ Day 2
 
 Rollback
 
-If before we turn on the redirect we can just not launch.  After the launch before Day 2 rollback is just a matter of changing the Namecheap DNS back to heroku and the AWS dns to a bucket that redirects to the OLD url.
+If rollback is  before we turn on the redirect we can just not launch since the old domain is not effected.  After the launch before Day 2, rollback is just a matter of changing the Namecheap DNS back to heroku and the AWS dns to a bucket that redirects to the OLD url.
 
 DNS Rollback
 
