@@ -1,4 +1,4 @@
-Before Day 1
+Before Day 0
 - Set ttl for clearmyrecord.codeforamerica.org to 60sec
   - Make sure DNS in route53 is set low as well
 - Limit Increase of Elastic IPs
@@ -11,6 +11,7 @@ Day 0
 
 - Run snapshot on prod
 - Run create_storage playbooks to update DB and S3 configurations
+- Turn on bucket encryption for the media bucket
 
 Day 1
 
