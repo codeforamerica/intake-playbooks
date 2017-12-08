@@ -65,7 +65,7 @@
         vpc_id: "{{ vpc.vpc.id }}"
         name: "{{ project_slug }}-nacl-public"
         region: "{{ region }}"
-        subnets: ["{{ project_slug }}_subnet_public"]
+        subnets: ["{{ project_slug }}_subnet_public", "{{ project_slug }}_subnet_public2"]
 
         ingress: [
             # rule no, protocol, allow/deny, cidr, icmp_code, icmp_type,
@@ -147,7 +147,7 @@
             gateway_id: "{{ nat_gateway2.nat_gateway_id }}"
       register: private_route_table
 
-    - name: Create  NACL for private subjects
+    - name: Create  NACL for private subnets
       ec2_vpc_nacl:
         vpc_id: "{{ vpc.vpc.id }}"
         name: "{{ project_slug }}-nacl-private"
