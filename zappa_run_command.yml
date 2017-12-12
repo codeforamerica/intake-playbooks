@@ -1,0 +1,27 @@
+---
+- include: includes/build_project_dir.yml
+- include: includes/create_zappa_settings.yml
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Install Newest Version of Zappa
+      pip:
+        name: zappa
+        virtualenv: "{{ venv_path }}"
+        virtualenv_python: python3.6
+      environment:
+        PYTHONPATH: "python3.6"
+
+    - name: Run Command from Lambda
+      shell: "source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa {{ run_command_pre }} {{ environment_name }} {{ run_command_post }}"
+      args:
+        chdir: "{{ project_path }}"
+        executable: /bin/bash
+      environment:
+        PYTHONPATH: "python3.6"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+      register: run_command
+    - debug: var=run_command.stdout_lines
+
