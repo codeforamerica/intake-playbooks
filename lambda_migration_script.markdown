@@ -1,11 +1,13 @@
 Before Day 0
-- Set ttl for clearmyrecord.codeforamerica.org to 60sec
-  - Make sure DNS in route53 is set low as well
-- Limit Increase of Elastic IPs
-- Create ACM certificates for Prod
-- Create Inventories for Prod
-- Setup alias from clearmyrecord.org to the redirect bucket
-- Search for old url in site and on social media and update where possible.
+- [x] Research Sentry for Lambda/AWS
+- [x] Set ttl for clearmyrecord.codeforamerica.org to 60sec
+- [ ] Increase Limit of Elastic IPs
+- [x] Create ACM certificates for Prod
+- [x] Setup alias from clearmyrecord.org to the redirect bucket
+- [ ] Create Inventories in Tower for Prod
+- [x] Create tower AMI user Update Credentials on Tower
+- [ ] Search for old url in site and on social media and update where possible.
+- [ ] Add Run arbitrary zappa command on Ansible Tower
 
 Day 0
 
@@ -16,7 +18,7 @@ Day 0
 Day 1
 
 - Update to new sync the new s3 bucket and update Heroku and delete on old
-- Confirm Heroku site and Lambda branch up to date
+- Confirm Heroku site is working and Lambda branch up to date
 - Run snapshot on prod
 - Run Deploy Zappa playbook
 - It should take <40min for the site to appear at www.clearmyrecord.org, we can test on the temporary domain if we set allowed host.
@@ -25,15 +27,19 @@ Day 1
 
 - Update Twilio and Mailgun end points to new URLs
 - Turn off scheduled tasks on Heroku
+- UAT Twilio Voicemail
+
+- Make really sure
 - Add redirect on NameCheap from old new to new.
+- Add pingdom on new Domain at /health/
 
 Day 2
 
-- Check DNS has completely propogated
+- Check DNS has completely propogated and check Heroku traffic
 - Turn off heroku app and old site is gone
 - Change database user password(requires temporary downtime <1min)
 - Make database not public(by clicking in AWS)
-- Run close postgres ports playebooks
+- Run close postgres ports playbooks
 
 Rollback
 
