@@ -13,6 +13,7 @@ Day 0
 
 - Run snapshot on prod
 - Run create_storage playbooks to update DB and S3 configurations
+- Manually a user with r/w access to the media bucket and update heroku
 - Turn on bucket encryption for the media bucket
 
 Day 1
@@ -32,6 +33,7 @@ Day 1
 - Make really sure
 - Add redirect on NameCheap from old new to new.
 - Add pingdom on new Domain at /health/
+- Change ALLOWED_HOSTS from * to www.clearymyrecord.org
 
 Day 2
 
@@ -40,7 +42,7 @@ Day 2
 - Change database user password(requires temporary downtime <1min)
 - Make database not public(by clicking in AWS)
 - Run close postgres ports playbooks
-
+- Remove temporary user for Heroku to access media bucket.
 Rollback
 
 If rollback is  before we turn on the redirect we can just not launch since the old domain is not effected.  After the launch before Day 2, rollback is just a matter of changing the Namecheap DNS back to heroku and the AWS dns to a bucket that redirects to the OLD url.

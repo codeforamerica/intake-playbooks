@@ -1,10 +1,10 @@
 ---
 project: "Clear My Record[production]"
 project_slug: cmr-production-r1
-hosted_zone: clearmyrecord.org
-domain: www.clearmyrecord.org
 environment_name: production
 settings_name: prod
+hosted_zone: clearmyrecord.org
+domain: www.clearmyrecord.org
 region: us-east-1
 az: us-east-1a
 az2: us-east-1b
@@ -12,3 +12,23 @@ pg_username: postgres
 pg_fs_size: 100
 pg_instance_type: db.t2.medium
 pg_app_username: intake
+certificate_arn: "arn:aws:acm:us-east-1:860089363282:certificate/2b061b5b-1dd4-404f-8541-4e7ec710cad9"
+base_path: /tmp
+static_bucket: "{{ project_slug }}-static-files"
+media_bucket: "{{ project_slug }}-media-files"
+
+environment_variables:
+  ALLOWED_HOSTS: "*"
+  STATIC_BUCKET: "{{ project_slug }}-static-files"
+  MEDIA_BUCKET: "{{ project_slug }}-media-files"
+  FRONT_EMAIL_CHANNEL_ID: cha_ok0
+  FRONT_PHONE_CHANNEL_ID: cha_nx8
+  LIVE_COUNTY_CHOICES: "1"
+  MAIL_DEFAULT_SENDER: no-reply@clearmyrecord.org
+  DEFAULT_HOST: https://www.clearmyrecord.org
+  DIVERT_REMOTE_CONNECTIONS: "False"
+  VOICEMAIL_NOTIFICATION_EMAIL: clearmyrecord@codeforamerica.orgd
+  PURGED_DATABASE_USER: intake
+  PARTNERSHIPS_LEAD_INBOX: clearmyrecord@codeforamerica.org
+
+
