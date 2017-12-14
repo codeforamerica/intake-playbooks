@@ -14,8 +14,6 @@ pg_instance_type: db.t2.medium
 pg_app_username: intake
 certificate_arn: "arn:aws:acm:us-east-1:860089363282:certificate/34867542-7621-4ad1-81be-7065586c4fc1"
 base_path: /tmp
-static_bucket: "{{ project_slug }}-static-files"
-media_bucket: "{{ project_slug }}-media-files"
 
 environment_variables:
   ALLOWED_HOSTS: "*"
