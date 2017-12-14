@@ -304,6 +304,54 @@
               "Version": "2012-10-17"
           }
 
+
+
+    - name: Create S3 User for Heroku Application[remove soon]
+      iam:
+        iam_type: user
+        name: "{{ project_slug }}-heroku-s3-user"
+        state: present
+      register: s3_user
+
+    - name: Create S3 permission for Heroku application user on media bucket[remove soon]
+      iam_policy:
+        policy_name: "{{ project_slug }}-heroku-s3-media-policy"
+        iam_name: "{{ project_slug }}-heroku-s3-user"
+        iam_type: user
+        state: present
+        region: "{{ region }}"
+        policy_json: >
+          {
+              "Statement": [
+                  {
+                      "Action": [
+                          "s3:ListBucket",
+                          "s3:GetBucketLocation",
+                          "s3:ListBucketMultipartUploads",
+                          "s3:ListBucketVersions"
+                      ],
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:s3:::{{ project_slug }}-media-files"
+                      ]
+                  },
+                  {
+                      "Action": [
+                          "s3:*Object*",
+                          "s3:ListMultipartUploadParts",
+                          "s3:AbortMultipartUpload"
+                      ],
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:s3:::{{ project_slug }}-media-files/*"
+                      ]
+                  }
+              ],
+              "Version": "2012-10-17"
+          }
+
+
+
     - name: Create S3 bucket to hold fixtures for data sync
       s3_bucket:
         name: "{{ project_slug }}-sync"
