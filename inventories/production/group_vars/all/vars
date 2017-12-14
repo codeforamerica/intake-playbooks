@@ -17,16 +17,8 @@ base_path: /tmp
 
 environment_variables:
   ALLOWED_HOSTS: "www.clearmyrecord.org"
-  STATIC_BUCKET: "{{ project_slug }}-static-files"
-  MEDIA_BUCKET: "{{ project_slug }}-media-files"
-  FRONT_EMAIL_CHANNEL_ID: cha_ok0
-  FRONT_PHONE_CHANNEL_ID: cha_nx8
-  LIVE_COUNTY_CHOICES: "1"
   MAIL_DEFAULT_SENDER: no-reply@clearmyrecord.org
-  DEFAULT_HOST: https://www.clearmyrecord.org
-  DIVERT_REMOTE_CONNECTIONS: "False"
   VOICEMAIL_NOTIFICATION_EMAIL: clearmyrecord@codeforamerica.orgd
-  PURGED_DATABASE_USER: clips
   PARTNERSHIPS_LEAD_INBOX: clearmyrecord@codeforamerica.org
 
 

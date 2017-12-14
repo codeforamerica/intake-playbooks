@@ -35,6 +35,14 @@
           PURGED_DATABASE_PASSWORD: "{{ pg_clips_password }}"
           AWS_ID: "{{ aws_id }}"
           AWS_SECRET: "{{ aws_secret }}"
+          STATIC_BUCKET: "{{ project_slug }}-static-files"
+          MEDIA_BUCKET: "{{ project_slug }}-media-files"
+          DEFAULT_HOST: "https://{{ domain }}"
+          FRONT_EMAIL_CHANNEL_ID: cha_ok0
+          FRONT_PHONE_CHANNEL_ID: cha_nx8
+          LIVE_COUNTY_CHOICES: "1"
+          PURGED_DATABASE_USER: clips
+          DIVERT_REMOTE_CONNECTIONS: "False"
 
     - set_fact:
         lambda_environment:

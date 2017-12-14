@@ -17,15 +17,7 @@ base_path: /tmp
 
 environment_variables:
   ALLOWED_HOSTS: "staging.clearmyrecord.org"
-  STATIC_BUCKET: "{{ project_slug }}-static-files"
-  MEDIA_BUCKET: "{{ project_slug }}-media-files"
-  FRONT_EMAIL_CHANNEL_ID: cha_ok0
-  FRONT_PHONE_CHANNEL_ID: cha_nx8
-  LIVE_COUNTY_CHOICES: "1"
   MAIL_DEFAULT_SENDER: no-reply@staging.clearmyrecord.org
-  DEFAULT_HOST: https://staging.clearmyrecord.org
-  DIVERT_REMOTE_CONNECTIONS: "False"
   VOICEMAIL_NOTIFICATION_EMAIL: cmrtestuser@gmail.com
-  PURGED_DATABASE_USER: clips
   PARTNERSHIPS_LEAD_INBOX: cmrtestuser+partnerships@gmail.com
 
