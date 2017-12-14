@@ -1,7 +1,9 @@
-Before Day 0
+# Launch Timeline
+
+## Before Day 0
 - [x] Research Sentry for Lambda/AWS
 - [x] Set ttl for clearmyrecord.codeforamerica.org to 60sec
-- [ ] Increase Limit of Elastic IPs
+- [x] Increase Limit of Elastic IPs
 - [x] Create ACM certificates for Prod
 - [x] Setup alias from clearmyrecord.org to the redirect bucket
 - [ ] Create Inventories in Tower for Prod
@@ -9,40 +11,51 @@ Before Day 0
 - [ ] Search for old url in site and on social media and update where possible.
 - [ ] Add Run arbitrary zappa command on Ansible Tower
 
-Day 0
+## Day 1 Morning
 
 - Run snapshot on prod
 - Run create_storage playbooks to update DB and S3 configurations
-- Manually a user with r/w access to the media bucket and update heroku
 - Turn on bucket encryption for the media bucket
+- Sync new Media bucket with old
+- Update heroku to use new Heroku S3 user(config:set from command line)
+- Run Sync again just incase on new Media bucket with old
 
-Day 1
+## Day 1 Lunch
 
-- Update to new sync the new s3 bucket and update Heroku and delete on old
 - Confirm Heroku site is working and Lambda branch up to date
 - Run snapshot on prod
+- Turn off scheduled tasks on Heroku
 - Run Deploy Zappa playbook
 - It should take <40min for the site to appear at www.clearmyrecord.org, we can test on the temporary domain if we set allowed host.
+- Take temporary URL and run smoke tests/UAT
+  - Hit the 500 page and make sure emails go out and logs happen
+  - Run debug task
+  - Log into admin
+  - View applications list page
+  - Explore applications, click around but change nothing
+  - View pdf.
 - After UAT on the new site and the domain is up and working.
 - New site is live
-
 - Update Twilio and Mailgun end points to new URLs
-- Turn off scheduled tasks on Heroku
-- UAT Twilio Voicemail
+  - In mailgun click the test bounce button and check the logs for the request.
+  - Call Twilio Voicemail number and check email went out to the VOICEMAIL email.
 
 - Make really sure
-- Add redirect on NameCheap from old new to new.
+- Add redirect on NameCheap from old url to new.
 - Add pingdom on new Domain at /health/
+- Tell team migration Lambda is live and tested.
 
-Day 2
+##Day 2
 
 - Check DNS has completely propogated and check Heroku traffic
+- Do an audit hour looking atthe past days traffic for errors.
 - Turn off heroku app and old site is gone
-- Change database user password(requires temporary downtime <1min)
+- Change database user password using change_db_password playbook (requires temporary downtime <1min)
 - Make database not public(by clicking in AWS)
 - Run close postgres ports playbooks
 - Remove temporary user for Heroku to access media bucket.
-Rollback
+
+#Rollback
 
 If rollback is  before we turn on the redirect we can just not launch since the old domain is not effected.  After the launch before Day 2, rollback is just a matter of changing the Namecheap DNS back to heroku and the AWS dns to a bucket that redirects to the OLD url.
 
