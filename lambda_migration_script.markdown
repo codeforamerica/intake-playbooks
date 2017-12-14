@@ -79,7 +79,38 @@ Stuff to Reseach
 - Since Lambda rolls keys when updating Heroku will loss S3 access each deploy/update unless it is also updated.
   - Make a 2nd user for heroku ahead of time and delete it later?
 
+# Monitoring Lambda
 
-Monitoring
+## Logs 
 
+Currently the best way to scan the Django logs on Lambda is to go into cloud watch and click on the [log section](https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logs:)
+
+Click on the log group called intake-production, on this page you will see one log steam per invocation of zappa.  To make it easier to view click text instead of row  on the top right.  To search through the all click on the top checkbox in the checkbox column and click Search Log Group.
+
+The logs go from oldest(top) to newest(bottom).  You can filter events using a special language decribed [here](https://docs.aws.amazon.com/console/cloudwatch/logs/patternSyntax).
+
+- To see just the info logs type `"[INFO]"`
+- To see the any 500s and other error logs search  `Error`
+- to get just the gets to `"[INFO]" GET` or for post `"[INFO]" POST`
+- All requests to url `"'path': '/'"`
+
+## Lambda Metrics
+
+To view metric(graphs) using the Web API metrics is going to give the closest experience to typical web server metrics. In the [metric section ](https://c  onsole.aws.amazon.com/cloudwatch/home?region=us-east-1#metricsV2:graph=~();namespace=AWS/ApiGateway;dimensions=ApiName,Stage). From there its simple to make a graph of total requests, 4XX, and 5XX responses.  You can also make a latency graph.
+
+From the Lamba function itself in the monitoring tab there is a premade dashboard that shows metrics and allows us to click through to the logs in that area.  One thing to be aware of is that invoccations include scheduled tasks, command run via Zappa/Ansible, and 4min keep warm task.
+
+
+## Lambda Alarms
+
+- You can also set alarms here bases on metrics in CloudWatch.
+- Tower has and can be configured to send emails on failed jobs.
+- Pingdom can be pointed at the Health domain
+- Django Emails on 500s(as long as sendgrid is working)
+
+## Postgres
+
+Postgres isn't really changing on this migrations.  We have advanced metrics turned on but AWS doesn't do slow query logs out of the box.  Here are the production postgres [logs](https://console.aws.amazon.com/rds/home?region=us-east-1#dbinstance:id=cmr-production-r1-database;view=logs)
+
+Do view the build in RDS dashboard click show monitoring in the RDS instance section.
 
