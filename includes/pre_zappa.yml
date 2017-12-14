@@ -31,8 +31,8 @@
           PYTHONPATH: "python3.6" # for Tower
           DATABASE_HOST: "{{ database.instance.endpoint }}"
           DATABASE_PASSWORD: "{{ pg_app_password }}"
-          PURGED_DATABASE_HOST: "{{ database.instance.endpoint }}"
-          PURGED_DATABASE_PASSWORD: "{{ pg_app_password }}"
+          PURGED_DATABASE_HOST: "{{ purged_database_host }}"
+          PURGED_DATABASE_PASSWORD: "{{ pg_clips_password }}"
           AWS_ID: "{{ aws_id }}"
           AWS_SECRET: "{{ aws_secret }}"
 

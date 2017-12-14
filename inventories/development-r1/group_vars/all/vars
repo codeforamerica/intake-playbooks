@@ -26,5 +26,5 @@ environment_variables:
   DEFAULT_HOST: https://dev.clearmyrecord.org
   DIVERT_REMOTE_CONNECTIONS: "False"
   VOICEMAIL_NOTIFICATION_EMAIL: cmrtestuser@gmail.com
-  PURGED_DATABASE_USER: intake
+  PURGED_DATABASE_USER: clips
   PARTNERSHIPS_LEAD_INBOX: cmrtestuser+partnerships@gmail.com

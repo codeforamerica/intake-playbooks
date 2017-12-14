@@ -26,7 +26,7 @@ environment_variables:
   DEFAULT_HOST: https://www.clearmyrecord.org
   DIVERT_REMOTE_CONNECTIONS: "False"
   VOICEMAIL_NOTIFICATION_EMAIL: clearmyrecord@codeforamerica.orgd
-  PURGED_DATABASE_USER: intake
+  PURGED_DATABASE_USER: clips
   PARTNERSHIPS_LEAD_INBOX: clearmyrecord@codeforamerica.org
 
 
