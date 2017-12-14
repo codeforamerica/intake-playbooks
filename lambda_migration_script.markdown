@@ -33,7 +33,6 @@ Day 1
 - Make really sure
 - Add redirect on NameCheap from old new to new.
 - Add pingdom on new Domain at /health/
-- Change ALLOWED_HOSTS from * to www.clearymyrecord.org
 
 Day 2
 
@@ -79,4 +78,8 @@ Stuff to Reseach
 - Will replicas effect changing PG subnets around?
 - Since Lambda rolls keys when updating Heroku will loss S3 access each deploy/update unless it is also updated.
   - Make a 2nd user for heroku ahead of time and delete it later?
+
+
+Monitoring
+
 

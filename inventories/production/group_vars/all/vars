@@ -16,7 +16,7 @@ certificate_arn: "arn:aws:acm:us-east-1:860089363282:certificate/2b061b5b-1dd4-4
 base_path: /tmp
 
 environment_variables:
-  ALLOWED_HOSTS: "*"
+  ALLOWED_HOSTS: "www.clearmyrecord.org"
   STATIC_BUCKET: "{{ project_slug }}-static-files"
   MEDIA_BUCKET: "{{ project_slug }}-media-files"
   FRONT_EMAIL_CHANNEL_ID: cha_ok0
