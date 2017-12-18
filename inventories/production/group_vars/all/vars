@@ -18,7 +18,7 @@ base_path: /tmp
 environment_variables:
   ALLOWED_HOSTS: "www.clearmyrecord.org"
   MAIL_DEFAULT_SENDER: no-reply@clearmyrecord.org
-  VOICEMAIL_NOTIFICATION_EMAIL: clearmyrecord@codeforamerica.orgd
+  VOICEMAIL_NOTIFICATION_EMAIL: clearmyrecord@codeforamerica.org
   PARTNERSHIPS_LEAD_INBOX: clearmyrecord@codeforamerica.org
 
 
