@@ -6,19 +6,20 @@
 - [x] Increase Limit of Elastic IPs
 - [x] Create ACM certificates for Prod
 - [x] Setup alias from clearmyrecord.org to the redirect bucket
-- [ ] Create Inventories in Tower for Prod
+- [x] Create Inventories in Tower for Prod
 - [x] Create tower AMI user Update Credentials on Tower
 - [ ] Search for old url in site and on social media and update where possible.
-- [ ] Add Run arbitrary zappa command on Ansible Tower
+- [x] Add Run arbitrary zappa command on Ansible Tower
 
 ## Day 1 Morning
 
-- Run snapshot on prod
-- Run create_storage playbooks to update DB and S3 configurations
-- Turn on bucket encryption for the media bucket
-- Sync new Media bucket with old
-- Update heroku to use new Heroku S3 user(config:set from command line)
-- Run Sync again just incase on new Media bucket with old
+- [x] Run snapshot on prod
+- [x] Run create_storage playbooks to update DB and S3 configurations
+- [x] Turn on bucket encryption for the media bucket
+- [x] Sync new Media bucket with old
+- [x] Update heroku to use new Heroku S3 user(config:set from command line)
+- [x] Run Sync again just incase on new Media bucket with old
+- [x] Delete old bucket
 
 ## Day 1 Lunch
 
@@ -29,7 +30,7 @@
 - It should take <40min for the site to appear at www.clearmyrecord.org, we can test on the temporary domain if we set allowed host.
 - Take temporary URL and run smoke tests/UAT
   - Hit the 500 page and make sure emails go out and logs happen
-  - Run debug task
+  - Run debug task and Check Logs
   - Log into admin
   - View applications list page
   - Explore applications, click around but change nothing
@@ -48,7 +49,7 @@
 ##Day 2
 
 - Check DNS has completely propogated and check Heroku traffic
-- Do an audit hour looking atthe past days traffic for errors.
+- Do an audit hour looking at the past days traffic for errors.
 - Turn off heroku app and old site is gone
 - Change database user password using change_db_password playbook (requires temporary downtime <1min)
 - Make database not public(by clicking in AWS)
@@ -111,13 +112,13 @@ The logs go from oldest(top) to newest(bottom).  You can filter events using a s
 
 To view metric(graphs) using the Web API metrics is going to give the closest experience to typical web server metrics. In the [metric section ](https://c  onsole.aws.amazon.com/cloudwatch/home?region=us-east-1#metricsV2:graph=~();namespace=AWS/ApiGateway;dimensions=ApiName,Stage). From there its simple to make a graph of total requests, 4XX, and 5XX responses.  You can also make a latency graph.
 
-From the Lamba function itself in the monitoring tab there is a premade dashboard that shows metrics and allows us to click through to the logs in that area.  One thing to be aware of is that invoccations include scheduled tasks, command run via Zappa/Ansible, and 4min keep warm task.
+From the Lamba function itself in the monitoring tab there is a premade dashboard that shows metrics and allows us to click through to the logs in that area.  One thing to be aware of is that invocations include scheduled tasks, command run via Zappa/Ansible, and 4min keep warm task.
 
 
 ## Lambda Alarms
 
 - You can also set alarms here bases on metrics in CloudWatch.
-- Tower has and can be configured to send emails on failed jobs.
+- Tower can be configured to send emails on failed jobs and some already are.
 - Pingdom can be pointed at the Health domain
 - Django Emails on 500s(as long as sendgrid is working)
 
@@ -125,5 +126,5 @@ From the Lamba function itself in the monitoring tab there is a premade dashboar
 
 Postgres isn't really changing on this migrations.  We have advanced metrics turned on but AWS doesn't do slow query logs out of the box.  Here are the production postgres [logs](https://console.aws.amazon.com/rds/home?region=us-east-1#dbinstance:id=cmr-production-r1-database;view=logs)
 
-Do view the build in RDS dashboard click show monitoring in the RDS instance section.
+To view the RDS dashboard click show monitoring in the RDS instance section.
 
