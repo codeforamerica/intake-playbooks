@@ -2,6 +2,7 @@
 project: "Clear My Record[development]"
 project_slug: cmr-development-r1
 environment_name: development
+branch_name: develop
 settings_name: prod
 hosted_zone: dev.clearmyrecord.org
 domain: dev.clearmyrecord.org

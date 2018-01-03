@@ -87,7 +87,7 @@
       git:
         repo: 'https://github.com/codeforamerica/intake.git'
         dest: "{{ project_path }}"
-        version: feature/zappa_changes
+        version: "{{ branch_name }}"
 
     - name: Create Zappa Settings File
       template:
