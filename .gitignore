@@ -2,3 +2,4 @@
 *.swo
 *.retry
 vault
+.idea

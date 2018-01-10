@@ -34,3 +34,15 @@
         AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 
 - include: includes/post_zappa.yml
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Running New fixtures
+      shell: "{{ venv_path }}/bin/python ./manage.py new_fixtures --no-input --settings project.settings.{{ settings_name  }}"
+      args:
+        chdir: "{{ project_path }}"
+        executable: /bin/bash
+      environment:
+        "{{ lambda_environment.Variables }}"
+      when: create_dummy_data is defined
