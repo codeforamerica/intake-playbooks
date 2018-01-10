@@ -45,4 +45,4 @@
         executable: /bin/bash
       environment:
         "{{ lambda_environment.Variables }}"
-      when: create_dummy_data is defined
+      when: create_dummy_data
