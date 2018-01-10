@@ -43,6 +43,7 @@
           LIVE_COUNTY_CHOICES: "1"
           PURGED_DATABASE_USER: clips
           DIVERT_REMOTE_CONNECTIONS: "False"
+          MANIFEST_VERSION: "{{ time }}"
 
     - set_fact:
         lambda_environment:
