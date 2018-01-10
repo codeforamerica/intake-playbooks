@@ -39,7 +39,7 @@
   gather_facts: no
   tasks:
     - name: Running New fixtures
-      shell: "{{ venv_path }}/bin/python ./manage.py new_fixtures --no-input --settings project.settings.{{ settings_name  }}"
+      shell: "{{ venv_path }}/bin/python ./manage.py new_fixtures --settings project.settings.{{ settings_name  }}"
       args:
         chdir: "{{ project_path }}"
         executable: /bin/bash
