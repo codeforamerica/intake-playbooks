@@ -1,24 +1,24 @@
 ---
-project: "Clear My Record[staging]"
-project_slug: cmr-staging-r2
-environment_name: staging
-branch_name: develop
+project: "Clear My Record[demo]"
+project_slug: cmr-demo-r1
+environment_name: demo
+branch_name: master
 settings_name: prod
 hosted_zone: dev.clearmyrecord.org
-domain: staging.dev.clearmyrecord.org
+domain: demo.dev.clearmyrecord.org
 region: us-east-1
 az: us-east-1a
 az2: us-east-1b
 pg_username: postgres
-pg_fs_size: 100
-pg_instance_type: db.t2.medium
+pg_fs_size: 5
+pg_instance_type: db.t2.small
 pg_app_username: intake
 certificate_arn: "arn:aws:acm:us-east-1:007849073905:certificate/d364179c-9105-432d-a611-e0d4dae9ae19"
 base_path: /tmp
 
 environment_variables:
   ALLOWED_HOSTS: "*"
-  MAIL_DEFAULT_SENDER: no-reply@staging.clearmyrecord.org
+  MAIL_DEFAULT_SENDER: no-reply@demo.dev.clearmyrecord.org
   VOICEMAIL_NOTIFICATION_EMAIL: cmrtestuser@gmail.com
   PARTNERSHIPS_LEAD_INBOX: cmrtestuser+partnerships@gmail.com
 

@@ -12,7 +12,7 @@
     "aws_region": "us-east-1",
     "django_settings": "project.settings.{{ settings_name }}",
     "domain": "{{ domain }}",
-    "timeout": 300,
+    "timeout_seconds": 300,
     "certificate_arn": "{{ certificate_arn }}",
     "s3_bucket": "{{ project_slug }}-zappa",
     "exclude": ["node_modules", "static", "media", "staticfiles-cache", "tests"],

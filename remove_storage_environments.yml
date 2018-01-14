@@ -142,6 +142,7 @@
     - name: Remove NAT Gateways
       ec2_vpc_nat_gateway:
         state: absent
+        region: "{{ region }}"
         nat_gateway_id: "{{ item.nat_gateway_id }}"
         wait: yes
       with_items: "{{ nat_gateways.result }}"
