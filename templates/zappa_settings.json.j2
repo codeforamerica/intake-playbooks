@@ -26,6 +26,10 @@
         "function": "zappa_scheduled_tasks.send_followups",
         "expression": "cron(0 19 * * ? *)"
       },
+      {
+        "function": "zappa_scheduled_tasks.inactive_orgs_task",
+        "expression": "cron(0 0 12 1 * ?)"
+      }
     ]
 }}
 
