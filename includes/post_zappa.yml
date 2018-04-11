@@ -18,7 +18,7 @@
         PYTHONPATH: "python3.5"
       when: s3_user.user_meta.access_keys|length > 0
 
-    - name: Run Migations
+    - name: Run Migrations
       shell: "source {{ venv_path }}/bin/activate && {{ venv_path }}/bin/zappa manage {{ environment_name }} migrate"
       args:
         chdir: "{{ project_path }}"
