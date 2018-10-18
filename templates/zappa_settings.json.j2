@@ -10,6 +10,7 @@
       ]
     },
     "aws_region": "us-east-1",
+    "environment_variables": {{ lambda_environment|to_json }},
     "django_settings": "project.settings.{{ settings_name }}",
     "domain": "{{ domain }}",
     "timeout_seconds": 300,

@@ -3,13 +3,6 @@
   connection: local
   gather_facts: no
   tasks:
-    - name: Set Environment Variables on Lambda function
-      command: "aws lambda update-function-configuration  --region {{ region  }} --function-name intake-{{ environment_name }}  --environment '{{ lambda_environment|to_json }}'"
-      environment:
-        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-        PYTHONPATH: "python3.5"
-
     - name: Delete Old Key for S3 User for Application
       command: "aws iam delete-access-key --access-key {{ s3_user.user_meta.access_keys[0].access_key_id }} --user-name {{ project_slug }}-s3-user"
       environment:
