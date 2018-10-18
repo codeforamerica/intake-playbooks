@@ -8,6 +8,7 @@
     - name: Install Newest Version of Zappa
       pip:
         name: zappa
+        version: "0.46.2"
         virtualenv: "{{ venv_path }}"
         virtualenv_python: python3.6
       environment:
