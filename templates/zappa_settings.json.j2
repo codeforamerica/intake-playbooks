@@ -18,6 +18,7 @@
     "s3_bucket": "{{ project_slug }}-zappa",
     "exclude": ["node_modules", "static", "media", "staticfiles-cache", "tests"],
     "xray_tracing": true,
+    "use_precompiled_packages": false,
     "events": [
       {
         "function": "zappa_scheduled_tasks.send_unopened_apps_notification",
