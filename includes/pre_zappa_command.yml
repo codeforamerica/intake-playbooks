@@ -1,0 +1,83 @@
+---
+- include: build_project_dir.yml
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - set_fact:
+        compiled_environment_variables:
+          PYTHONPATH: "python3.6" # for Tower
+          DATABASE_HOST: "{{ database.instance.endpoint }}"
+          DATABASE_PASSWORD: "{{ pg_app_password }}"
+          PURGED_DATABASE_HOST: "{{ purged_database_host }}"
+          PURGED_DATABASE_PASSWORD: "{{ pg_clips_password }}"
+          DEFAULT_HOST: "https://{{ domain }}"
+          FRONT_EMAIL_CHANNEL_ID: cha_ok0
+          FRONT_PHONE_CHANNEL_ID: cha_nx8
+          LIVE_COUNTY_CHOICES: "1"
+          PURGED_DATABASE_USER: clips
+          DIVERT_REMOTE_CONNECTIONS: "False"
+          MANIFEST_VERSION: "{{ time }}"
+
+    - set_fact:
+        lambda_environment:
+          Variables:
+            "{{ environment_variables|combine(secret_environment_variables)|combine(compiled_environment_variables) }}"
+
+    - name: Get VPC(will create if it doesn't exist, which isn't great)
+      ec2_vpc_net:
+        state: present
+        name: "{{ project_slug }}-vpc"
+        region: "{{ region }}"
+        cidr_block: 10.0.0.0/16
+      register: vpc
+
+    - name: Create Security Group for Lambda Application
+      ec2_group:
+        name: "{{ project_slug }}-lambda-security-group"
+        description: an example EC2 group
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        state: present
+        rules:
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 443
+            to_port: 443
+            cidr_ip: 0.0.0.0/0
+      register: "lambda_sg"
+
+    - name: Get Private Subnets
+      ec2_vpc_subnet_facts:
+        region: "{{ region }}"
+        filters:
+          vpc_id: "{{ vpc.vpc.id }}"
+          "tag:Type": "private"
+      register: private_subnets
+
+    - name: Download Project
+      git:
+        repo: 'https://github.com/codeforamerica/intake.git'
+        dest: "{{ project_path }}"
+        version: "{{ branch_name }}"
+
+    - name: Create Zappa Settings File
+      template:
+        src: ../templates/zappa_settings.json.j2
+        dest: "{{ project_path  }}/zappa_settings.json"
+
+    - name: Install Project requirements
+      pip:
+        requirements: "{{ project_path }}/requirements/zappa.txt"
+        virtualenv: "{{ venv_path }}"
+        virtualenv_python: python3.6
+      environment:
+        PYTHONPATH: "python3.6"
+
+    - name: Install NPM requirements
+      shell: "npm install"
+      args:
+        chdir: "{{ project_path }}"
