@@ -7,10 +7,6 @@
     - set_fact: root_path="/tmp/intake-{{ time }}"
     - set_fact: venv_path="{{ root_path }}/venv"
     - set_fact: project_path="{{ root_path }}/intake"
-    - set_fact:
-        lambda_environment:
-          Variables:
-            "{{ environment_variables|combine(secret_environment_variables)|combine(compiled_environment_variables) }}"
     - rds:
         command: facts
         instance_name: "{{ project_slug }}-database"
