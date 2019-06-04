@@ -7,6 +7,26 @@
     - set_fact: root_path="/tmp/intake-{{ time }}"
     - set_fact: venv_path="{{ root_path }}/venv"
     - set_fact: project_path="{{ root_path }}/intake"
+
+    - set_fact:
+        compiled_environment_variables:
+          PYTHONPATH: "python3.6" # for Tower
+          DATABASE_HOST: "{{ database.instance.endpoint }}"
+          DATABASE_PASSWORD: "{{ pg_app_password }}"
+          PURGED_DATABASE_HOST: "{{ purged_database_host }}"
+          PURGED_DATABASE_PASSWORD: "{{ pg_clips_password }}"
+          AWS_ID: "{{ aws_id }}"
+          AWS_SECRET: "{{ aws_secret }}"
+          STATIC_BUCKET: "{{ project_slug }}-static-files"
+          MEDIA_BUCKET: "{{ project_slug }}-media-files"
+          DEFAULT_HOST: "https://{{ domain }}"
+          FRONT_EMAIL_CHANNEL_ID: cha_ok0
+          FRONT_PHONE_CHANNEL_ID: cha_nx8
+          LIVE_COUNTY_CHOICES: "1"
+          PURGED_DATABASE_USER: clips
+          DIVERT_REMOTE_CONNECTIONS: "False"
+          MANIFEST_VERSION: "{{ time }}"
+
     - set_fact:
         lambda_environment:
           Variables:
