@@ -1,6 +1,5 @@
 ---
-- include: includes/build_project_dir.yml
-- include: includes/create_zappa_settings.yml
+- include: includes/pre_zappa.yml
 - hosts: localhost
   connection: local
   gather_facts: no
