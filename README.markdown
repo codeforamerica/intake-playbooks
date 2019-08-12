@@ -58,7 +58,7 @@ mkdir intake-ops
 cd intake-ops
 git clone git@github.com:codeforamerica/intake-playbooks.git
 cd intake-playbooks
-virtualenv -p /path/to/python2.7 venv
+virtualenv -p /path/to/python3.6 venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
