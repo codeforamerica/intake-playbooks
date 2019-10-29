@@ -103,3 +103,6 @@ If you want to deploy a new instance of Zappa you can run, which will also creat
 ansible-playbook -i inventories/project-name zappa_deploy.yml
 ```
 
+## Updating the SSL certificate
+
+Follow directions [here](https://docs.google.com/document/d/1cqujy3ZolYpS-O2_ChJBnQILETX61-aLh8N7A5ENZ_g/edit).
