@@ -16,7 +16,8 @@ You can then use [Update Lambda Environment](https://tower.clearmyrecord.org/#/t
 [Run Arbitrary Command on Lambda](https://tower.clearmyrecord.org/#/templates/job_template/22) is a Job which wraps the Zappa cli command like so `zappa [run__command_pre] [environment] [run_command_post]`.  So for example following the instructions below will run the run_debug_task management command.
 
 1. Click on the rocketship icon on Run Arbitrary Command on Lambda row.
-1. Select the development inventory and credentials.
+1. Select the inventory (Development for the staging site and Production for production)
+1. For credentials, keep the Dummy machine credential and search for Amazon Web Services credentials. Add the credential that matches your chosen inventory (Dev or Prod).
 1. Set the extra inventory variables to yaml below.  
 
 ```yaml
