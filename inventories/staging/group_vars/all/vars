@@ -2,7 +2,7 @@
 project: "Clear My Record[staging]"
 project_slug: cmr-staging-r2
 environment_name: staging
-branch_name: develop
+branch_name: lambda
 settings_name: prod
 hosted_zone: dev.clearmyrecord.org
 domain: staging.dev.clearmyrecord.org
