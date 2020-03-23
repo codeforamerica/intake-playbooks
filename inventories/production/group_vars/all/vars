@@ -2,7 +2,7 @@
 project: "Clear My Record[production]"
 project_slug: cmr-production-r1
 environment_name: production
-branch_name: master
+branch_name: lambda
 settings_name: prod
 hosted_zone: clearmyrecord.org
 domain: www.clearmyrecord.org

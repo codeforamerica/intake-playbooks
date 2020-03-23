@@ -2,7 +2,7 @@
 project: "Clear My Record[demo]"
 project_slug: cmr-demo-r1
 environment_name: demo
-branch_name: master
+branch_name: lambda
 settings_name: prod
 hosted_zone: dev.clearmyrecord.org
 domain: demo.dev.clearmyrecord.org

@@ -4,7 +4,7 @@ Tower can be used from the web interface found [here](tower.clearmyrecord.org) a
 
 ## Creating and Updating Environments
 
-After being given login credentials anyone with proper permissions can update the production to the most recent master branch environment by going [here](https://tower.clearmyrecord.org/#/templates/job_template/24) and the staging environment by going [here](https://tower.clearmyrecord.org/#/templates/job_template/10).
+After being given login credentials anyone with proper permissions can update the production to the most recent `lambda` branch environment by going [here](https://tower.clearmyrecord.org/#/templates/job_template/24) and the staging environment by going [here](https://tower.clearmyrecord.org/#/templates/job_template/10).
 
 The [Job Templates](https://tower.clearmyrecord.org/#/templates) page lists all of the jobs currently configured.  
 
